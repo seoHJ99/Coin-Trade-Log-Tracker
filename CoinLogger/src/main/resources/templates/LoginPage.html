@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>로그인 페이지</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+      .contain_all {
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .login_box {
+        width: 300px;
+        display: flex;
+        flex-flow: column;
+      }
+      .login_text {
+        display: flex;
+        justify-content: center;
+        height: 100px;
+        align-items: center;
+      }
+      .input_box {
+        width: 92%;
+        height: 25px;
+        padding: 0 10px;
+        margin-bottom: 10px;
+      }
+      .button {
+        margin: 5px;
+      }
+      .find_button {
+        display: flex;
+      }
+      .find_id {
+        flex-grow: 1;
+      }
+      .find_pw {
+        flex-grow: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="contain_all">
+      <div class="header"></div>
+      <div class="main">
+        <div class="login_box">
+          <div class="login_text">로그인</div>
+          <div>
+            <input type="text" class="input_box" />
+            <br />
+            <input type="password" class="input_box" />
+          </div>
+          <input type="button" class="submit button" value="로그인" />
+          <div class="find_button">
+            <input type="button" class="find_id button" value="아이디 찾기" />
+            <input type="button" class="find_pw button" value="비빌번호 찾기" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

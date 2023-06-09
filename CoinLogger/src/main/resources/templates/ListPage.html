@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        min-width: 1000px;
+      }
+      .contain_all {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 250px;
+      }
+      .header {
+        width: 100%;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+      .logout_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+      .nav {
+        display: flex;
+        justify-content: center;
+        position: relative;
+        width: 80%;
+        height: 30px;
+        padding: 10px;
+      }
+      .select_box {
+        display: flex;
+        flex-direction: column;
+        float: left;
+        position: absolute;
+        left: 0;
+        cursor: pointer;
+      }
+      .search {
+        width: 100px;
+        position: absolute;
+        right: 10px;
+      }
+      .option {
+        padding: 5px 20px;
+        margin-top: 5px;
+        border: 1px solid;
+        border-color: #b3b3b3;
+        border-radius: 15px;
+        display: none;
+      }
+      .wallet {
+        padding: 3px 10px;
+        cursor: pointer;
+      }
+      .wallet:hover {
+        background-color: black;
+        color: white;
+      }
+      .log {
+        cursor: pointer;
+        padding: 3px 10px;
+      }
+      .log:hover {
+        background-color: black;
+        color: white;
+      }
+      table {
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 20px;
+      }
+      th,
+      td {
+        padding: 5px;
+      }
+      .list {
+        max-height: 800px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="contain_all">
+      <div class="header">
+        <div><h1>코인 현황판</h1></div>
+        <div>
+          <a href="#" class="logout_btn">로그아웃</a>
+        </div>
+      </div>
+      <div class="nav">
+        <div class="select_box">
+          <div>
+            &#9660;
+            <span class="option_selected">지갑 합계</span>
+          </div>
+
+          <div class="option">
+            <div class="wallet">지갑 합계</div>
+            <div class="log">거래 내역</div>
+          </div>
+        </div>
+        <span>
+          <input type="radio" id="all" name="radio_check" />
+          <label for="upbit">전체</label>
+        </span>
+        <span>
+          <input type="radio" id="upbit" name="radio_check" />
+          <label for="upbit">업비트</label>
+        </span>
+        <button class="search">조회</button>
+      </div>
+      <div class="main">
+        <div class="list">
+          <table border="1" class="seperate">
+            <th>코인 이름</th>
+            <th>보유 개수</th>
+            <th>현재 가격</th>
+            <th>구매 가격</th>
+            <th>합계</th>
+            <th>수익률</th>
+            <tr>
+              <td>더미</td>
+              <td>더미</td>
+              <td>더미</td>
+              <td>더미</td>
+              <td>더미</td>
+              <td>더미</td>
+            </tr>
+          </table>
+        </div>
+
+        <table border="1" class="sum">
+          <th>총 구매 금액</th>
+          <th>총 수익 금액</th>
+          <th>총 수익률</th>
+          <tr>
+            <td>더미</td>
+            <td>더미</td>
+            <td>더미</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script>
+      $(".select_box").hover(
+        function () {
+          $(".option").css("display", "block");
+        },
+        function () {
+          $(".option").css("display", "none");
+        }
+      );
+      $(".wallet").click(function () {
+        optionNameChange(this);
+      });
+      $(".log").click(function () {
+        optionNameChange(this);
+      });
+      function optionNameChange(option) {
+        $(".option_selected").contents()[0].textContent = $(option).text();
+      }
+    </script>
+  </body>
+</html>

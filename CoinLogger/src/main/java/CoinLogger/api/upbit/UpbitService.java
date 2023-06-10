@@ -34,6 +34,8 @@ public class UpbitService implements ApiService {
 
         HttpResponse response = httpSender.sendApi(accessKey, secretKey);
         // response를 Map 형태로 변환하는 함수 제작 필요
+
+        return "aaaaa" ;
     }
 
     public String getCoinList() {

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>내정보</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        min-width: 1000px;
+      }
+      .contain_all {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 250px;
+      }
+      .header {
+        width: 100%;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+      .logout_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+      .main {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+      .coin_name {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        width: 820px;
+      }
+      .key_row {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 10px;
+      }
+      input[type="text"] {
+        min-width: 700px;
+        padding: 10px;
+        margin-left: 5px;
+      }
+      span {
+        display: inline;
+        min-width: 80px;
+        padding-top: 7px;
+      }
+      .save {
+        margin-top: 20px;
+      }
+      .keys {
+        background-color: #e1e0e0;
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="contain_all">
+      <div class="header">
+        <div><h1>코인 현황판</h1></div>
+        <div class="logout_btn">
+          <a href="#">로그아웃</a>
+          <a href="#" class="">내 정보</a>
+        </div>
+      </div>
+      <div class="main">
+        <div class="coin_name">
+          <div class="coin_check">
+            <input type="checkbox" id="upbit" class="coin_check_box" />
+            <label for="upbit">업비트</label>
+          </div>
+
+          <div class="key_row">
+            <span>엑세스 키 : </span>
+            <input
+              type="text"
+              placeholder="엑세스 키"
+              readonly
+              class="first_input keys"
+            />
+          </div>
+          <div class="key_row">
+            <span>시크릿 키 : </span>
+            <input
+              type="text"
+              placeholder="시크릿 키"
+              readonly
+              class="second_input keys"
+            />
+          </div>
+        </div>
+      </div>
+      <div>
+        <input type="button" class="save" value="저장" />
+      </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+    <script>
+      $(".coin_check_box").change(function () {
+        readonlyCon();
+      });
+
+      function readonlyCon() {
+        const inputList = $(".keys");
+        inputList.each(function () {
+          let status = $(this).prop("readonly");
+          console.log(status);
+          $(this).prop("readonly", !status);
+          if (status == true) {
+            $(this).css("background", "white");
+          } else {
+            $(this).css("background", "#e1e0e0");
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

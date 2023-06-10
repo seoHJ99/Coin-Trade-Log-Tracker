@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>코인 현황판</title>
     <style>
       html,
       body {
@@ -35,7 +35,7 @@
         display: flex;
         justify-content: center;
         position: relative;
-        width: 80%;
+        width: 60%;
         height: 30px;
         padding: 10px;
       }
@@ -76,6 +76,9 @@
         background-color: black;
         color: white;
       }
+      .main {
+        min-width: 800px;
+      }
       table {
         width: 100%;
         padding: 5px;
@@ -84,6 +87,7 @@
       th,
       td {
         padding: 5px;
+        text-align: center;
       }
       .list {
         max-height: 800px;
@@ -95,8 +99,9 @@
     <div class="contain_all">
       <div class="header">
         <div><h1>코인 현황판</h1></div>
-        <div>
-          <a href="#" class="logout_btn">로그아웃</a>
+        <div class="logout_btn">
+          <a href="#">로그아웃</a>
+          <a href="#" class="">내 정보</a>
         </div>
       </div>
       <div class="nav">
@@ -124,6 +129,14 @@
       <div class="main">
         <div class="list">
           <table border="1" class="seperate">
+            <colgroup>
+              <col width="16.6%" />
+              <col width="16.6%" />
+              <col width="16.6%" />
+              <col width="16.6%" />
+              <col width="16.6%" />
+              <col width="16.6%" />
+            </colgroup>
             <th>코인 이름</th>
             <th>보유 개수</th>
             <th>현재 가격</th>
@@ -142,6 +155,9 @@
         </div>
 
         <table border="1" class="sum">
+          <colgroup>
+            <col width="33.3%" />
+          </colgroup>
           <th>총 구매 금액</th>
           <th>총 수익 금액</th>
           <th>총 수익률</th>

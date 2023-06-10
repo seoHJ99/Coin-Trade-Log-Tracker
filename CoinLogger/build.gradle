@@ -19,6 +19,7 @@ repositories {
 }
 
 dependencies {
+	implementation 'com.squareup.okhttp3:okhttp:3.14.6'
 	implementation group: 'com.auth0', name: 'auth0', version: '1.44.2'
 	implementation group: 'com.auth0', name: 'java-jwt', version: '4.4.0'
 	implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'

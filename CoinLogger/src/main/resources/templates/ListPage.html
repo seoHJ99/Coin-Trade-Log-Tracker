@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -143,11 +143,11 @@
             <th>구매 가격</th>
             <th>합계</th>
             <th>수익률</th>
-            <tr>
-              <td>더미</td>
-              <td>더미</td>
-              <td>더미</td>
-              <td>더미</td>
+            <tr th:each="data : ${Data}">
+              <td th:text="${data[0]}">더미</td>
+              <td th:text="${data[1]}">더미</td>
+              <td th:text="${data[2]}">더미</td>
+              <td th:text="${data[3]}">더미</td>
               <td>더미</td>
               <td>더미</td>
             </tr>

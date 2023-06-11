@@ -2,15 +2,12 @@ package CoinLogger.api;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.util.UUID;
 

@@ -1,55 +1,37 @@
 package CoinLogger;
 
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class PublicMethod {
-    public MultiValueMap<String, String> jsonToMap(String json){
-        MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
-        Map<String, String> result = new HashMap<>();
+    // 받아온 데이터를 List 형태로 변환
+    //         1              2                  3         4            5              6
+    // 순서 : 이름, 보유 수량 중 주문 가능한 수량, 묶여있는 수량, 매수평균가, 매수평균가 수정여부, 평단가 기준 화폐
+    public List<List<String>> jsonToList(String json){
+        List<List<String>> resultList = new ArrayList<>();
+
         json = json.replaceAll("\\[","").replaceAll("]","");
-        String[] list = json.split("}");
+        String[] list = json.replaceAll("\n","").split("}");
         for(int i = 0; i < list.length; i++){
             list[i] = list[i].replaceAll("\\{","")
                     .replaceAll("}","").replaceAll(" ","")
-                    .replaceAll("\n","").replaceAll("\"","" );
-            String[] innerList = list[i].split(",");
-            for(int j = 0; j< innerList.length; j++){
-                if(innerList[j].equals("") || innerList[j].equals(",")){
+                    .replaceAll("\"","" );
+
+            String [] partData = list[i].split(",");
+            List<String> rowData = new ArrayList<>();
+            for(int j =0; j< partData.length; j++){
+                if( partData[j].equals("")){
                     continue;
                 }
-                String preMap[] = innerList[j].split(":");
-                multiValueMap.add(preMap[0], preMap[1]);
+                rowData.add(partData[j].split(":")[1]);
             }
+            resultList.add( rowData );
+
         }
-        return multiValueMap;
+        return resultList;
     }
 
-    public static void main(String[] args) {
-        PublicMethod aa = new PublicMethod();
-        MultiValueMap<String, String> dd = aa.jsonToMap("[\n" +
-                "  {\n" +
-                "    \"currency\":\"KRW\",\n" +
-                "    \"balance\":\"1000000.0\",\n" +
-                "    \"locked\":\"0.0\",\n" +
-                "    \"avg_buy_price\":\"0\",\n" +
-                "    \"avg_buy_price_modified\":false,\n" +
-                "    \"unit_currency\": \"KRW\",\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"currency\":\"BTC\",\n" +
-                "    \"balance\":\"2.0\",\n" +
-                "    \"locked\":\"0.0\",\n" +
-                "    \"avg_buy_price\":\"101000\",\n" +
-                "    \"avg_buy_price_modified\":false,\n" +
-                "    \"unit_currency\": \"KRW\",\n" +
-                "  }\n" +
-                "]");
-    }
+
 }

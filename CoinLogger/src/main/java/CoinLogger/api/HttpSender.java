@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ public class HttpSender {
         this.apiRequest = apiRequest;
     }
 
-    public HttpResponse sendApi() {
+    public String sendApi() throws IOException {
         HttpResponse httpResponse = null;
         try {
             HttpGet request = new HttpGet(serverUrl + apiRequest);
@@ -37,10 +38,10 @@ public class HttpSender {
         }catch (IOException e){
             System.out.println("sendApi 에러 발생");
         }
-        return httpResponse;
+        return EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
     }
 
-    public HttpResponse sendApi(String accessKey, String secretKey) {
+    public String sendApi(String accessKey, String secretKey) throws IOException {
 
         //String accessKey = ("jaGJ8xxzTrxrqJcMPxwGxeAstH38fjXRAYNemMal"); // 받아오기
         //String secretKey = ("N8qFgecKx5B9s7HJJHexrADEDlT2znPSgTYENQCD"); // 받아오기
@@ -57,12 +58,10 @@ public class HttpSender {
 
             String authenticationToken = "Bearer " + jwtToken;
             request.addHeader("Authorization", authenticationToken);
-             httpResponse = httpClient.execute(request);
-
+            httpResponse = httpClient.execute(request);
         }catch (IOException e){
             System.out.println("sendApi 키 포함 메서드 에러 발생");
         }
-
-        return httpResponse;
+        return EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
     }
 }

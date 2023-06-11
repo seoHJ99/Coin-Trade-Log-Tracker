@@ -1,6 +1,7 @@
 package CoinLogger.api.upbit;
 
 
+import CoinLogger.PublicMethod;
 import CoinLogger.api.ApiService;
 import CoinLogger.api.HttpSender;
 import com.auth0.jwt.JWT;
@@ -12,8 +13,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -22,20 +26,21 @@ public class UpbitService implements ApiService {
 
     private final HttpClient httpClient;
     private final HttpSender httpSender;
+    private final PublicMethod publicMethod;
 
     @Override
-    public String getAccounts() {
-        String accessKey = (""); // 받아오기
-        String secretKey = (""); // 받아오기
-        String serverUrl = ("https://api.upbit.com");
+    public Map getAccounts() throws IOException {
+        String accessKey = ("jaGJ8xxzTrxrqJcMPxwGxeAstH38fjXRAYNemMal"); // 받아오기
+        String secretKey = ("N8qFgecKx5B9s7HJJHexrADEDlT2znPSgTYENQCD"); // 받아오기
 
-        httpSender.setApiRequest("https://api.upbit.com");
+
+        httpSender.setServerUrl("https://api.upbit.com");
         httpSender.setApiRequest("/v1/accounts");
 
-        HttpResponse response = httpSender.sendApi(accessKey, secretKey);
+        String responseJson = httpSender.sendApi(accessKey, secretKey);
         // response를 Map 형태로 변환하는 함수 제작 필요
-
-        return "aaaaa" ;
+        Map<String, List<String> > mapResult = publicMethod.jsonToMap(responseJson);
+        return mapResult;
     }
 
     public String getCoinList() {

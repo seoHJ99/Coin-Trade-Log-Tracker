@@ -23,11 +23,4 @@ public class ApiController {
         return upbit.getAccounts();
     }
 
-    @GetMapping("/test")
-    public Map<String, String> test(){
-        Map<String, String > a = new HashMap<>();
-        a.put("aaa", "bbb");
-        return a;
-
-    }
 }

@@ -53,6 +53,7 @@
         right: 10px;
       }
       .option {
+        background-color: white;
         padding: 5px 20px;
         margin-top: 5px;
         border: 1px solid;
@@ -117,11 +118,11 @@
           </div>
         </div>
         <span>
-          <input type="radio" id="all" name="radio_check" />
+          <input type="radio" id="all" name="radio_check" checked value="all" />
           <label for="upbit">전체</label>
         </span>
         <span>
-          <input type="radio" id="upbit" name="radio_check" />
+          <input type="radio" id="upbit" name="radio_check" value="upbit" />
           <label for="upbit">업비트</label>
         </span>
         <button class="search">조회</button>
@@ -130,25 +131,31 @@
         <div class="list">
           <table border="1" class="seperate">
             <colgroup>
-              <col width="16.6%" />
-              <col width="16.6%" />
-              <col width="16.6%" />
-              <col width="16.6%" />
-              <col width="16.6%" />
-              <col width="16.6%" />
+              <col width="12.5%" />
+              <col width="12.5%" />
+              <col width="12.5%" />
+              <col width="12.5%" />
+              <col width="12.5%" />
+              <col width="12.5%" />
+              <col width="12.5%" />
+              <col width="12.5%" />
             </colgroup>
             <th>코인 이름</th>
             <th>보유 개수</th>
             <th>현재 가격</th>
             <th>구매 가격</th>
             <th>합계</th>
+            <th>수익 금액</th>
             <th>수익률</th>
-            <tr th:each="data : ${Data}">
-              <td th:text="${data[0]}">더미</td>
-              <td th:text="${data[1]}">더미</td>
-              <td th:text="${data[2]}">더미</td>
-              <td th:text="${data[3]}">더미</td>
-              <td>더미</td>
+            <th>거래소</th>
+            <tr th:each="data : ${data}">
+              <td th:text="${ data.coinName }">더미</td>
+              <td th:text="${ data.ownAmount }">더미</td>
+              <td th:text="${ data.nowPrice }">더미</td>
+              <td th:text="${ data.buyPrice }">더미</td>
+              <td th:text="${ data.sumNowPrice }">더미</td>
+              <td th:text="${ data.earning }">더미</td>
+              <td th:text="${ data.rateOfReturn + '%' }">더미</td>
               <td>더미</td>
             </tr>
           </table>
@@ -156,15 +163,20 @@
 
         <table border="1" class="sum">
           <colgroup>
-            <col width="33.3%" />
+            <col width="25%" />
+            <col width="25%" />
+            <col width="25%" />
+            <col width="25%" />
           </colgroup>
-          <th>총 구매 금액</th>
+          <th>총 자본금</th>
+          <th>현재 총 금액</th>
           <th>총 수익 금액</th>
           <th>총 수익률</th>
           <tr>
-            <td>더미</td>
-            <td>더미</td>
-            <td>더미</td>
+            <td th:text="${secondData['totalBuyPrice']}">더미</td>
+            <td th:text="${secondData['totalNowPrice']}">더미</td>
+            <td th:text="${secondData['totalEarning']}">더미</td>
+            <td th:text="${secondData['avgRate'] + '%'}">더미</td>
           </tr>
         </table>
       </div>
@@ -187,6 +199,29 @@
       });
       function optionNameChange(option) {
         $(".option_selected").contents()[0].textContent = $(option).text();
+      }
+
+      //
+      $(".search").on("click", function () {
+        apiChooser();
+      });
+      function apiChooser() {
+        $("input[name = radio_check]").each(function () {
+          if ($(this).prop("checked")) {
+            value = $(this).val();
+          }
+        });
+        console.log(value);
+
+        let id = 0; // 나중에 설정해주기
+        $.ajax({
+          type: "GET",
+          async: false,
+          url: "/" + value + "/" + id + "/all-accounts",
+          error: function (e) {
+            alert("오류 발생");
+          },
+        });
       }
     </script>
   </body>

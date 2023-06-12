@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>코인 현황판</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        min-width: 1000px;
+      }
+      .contain_all {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 250px;
+      }
+      .header {
+        width: 100%;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+      .logout_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+      .nav {
+        display: flex;
+        justify-content: center;
+        position: relative;
+        width: 60%;
+        height: 30px;
+        padding: 10px;
+      }
+      .select_box {
+        display: flex;
+        flex-direction: column;
+        float: left;
+        position: absolute;
+        left: 0;
+        cursor: pointer;
+      }
+      .search {
+        width: 100px;
+        position: absolute;
+        right: 10px;
+      }
+      .option {
+        background-color: white;
+        padding: 5px 20px;
+        margin-top: 5px;
+        border: 1px solid;
+        border-color: #b3b3b3;
+        border-radius: 15px;
+        display: none;
+      }
+      .wallet {
+        padding: 3px 10px;
+        cursor: pointer;
+      }
+      .wallet:hover {
+        background-color: black;
+        color: white;
+      }
+      .log {
+        cursor: pointer;
+        padding: 3px 10px;
+      }
+      .log:hover {
+        background-color: black;
+        color: white;
+      }
+      .main {
+        min-width: 950px;
+      }
+      table {
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 20px;
+      }
+      td {
+        padding: 5px;
+        text-align: center;
+        border: 1px solid black;
+        height: 50px;
+      }
+      .sort {
+        background-color: red;
+        color: white;
+      }
+      .list {
+        max-height: 800px;
+        overflow: auto;
+      }
+      .col {
+        display: flex;
+        padding: 5px;
+        justify-content: space-evenly;
+      }
+      .col_name {
+        display: flex;
+        font-weight: bold;
+        margin-left: 2px;
+        justify-content: center;
+        align-items: center;
+        min-width: 104px;
+        min-height: 54px;
+        border: 1px solid black;
+      }
+      .table {
+        border: 1px solid black;
+      }
+      .state {
+        background-color: black;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="contain_all">
+      <div class="header">
+        <div><h1>코인 현황판</h1></div>
+        <div class="logout_btn">
+          <a href="#">로그아웃</a>
+          <a href="#" class="">내 정보</a>
+        </div>
+      </div>
+      <div class="nav">
+        <div class="select_box">
+          <div>
+            &#9660;
+            <span class="option_selected">거래 내역</span>
+          </div>
+
+          <div class="option">
+            <div class="wallet">지갑 합계</div>
+            <div class="log">거래 내역</div>
+          </div>
+        </div>
+        <span>
+          <input type="radio" id="all" name="radio_check" checked value="all" />
+          <label for="upbit">전체</label>
+        </span>
+        <span>
+          <input type="radio" id="upbit" name="radio_check" value="upbit" />
+          <label for="upbit">업비트</label>
+        </span>
+        <button class="search">조회</button>
+      </div>
+      <div class="main">
+        <div class="table">
+          <div class="col">
+            <span class="col_name">주문 날짜</span>
+            <span class="col_name">주문 종류</span>
+            <span class="col_name">주문 코인</span>
+            <span class="col_name"
+              >주문 당시 <br />
+              가격</span
+            >
+            <span class="col_name">주문 개수</span>
+            <span class="col_name">체결 개수</span>
+            <!-- <span class="col_name">남은 개수</span> -->
+            <span class="col_name">주문 상태</span>
+            <span class="col_name">거래소</span>
+          </div>
+          <div class="list">
+            <table class="seperate">
+              <tr th:each="log : ${log}">
+                <td th:text="${ log.orderTime }">더미</td>
+                <td class="sort" th:text="${ log.orderSort }">더미</td>
+                <td th:text="${ log.coinName }">더미</td>
+                <td
+                  th:text="${ #numbers.formatInteger( log.thatTimePrice, 3, 'COMMA') + '원' }"
+                >
+                  더미
+                </td>
+                <td th:text="${ log.orderAmount }">더미</td>
+                <td th:text="${ log.signedAmount }">더미</td>
+                <!-- <td th:text="${ log.remainAmount }">더미</td> -->
+                <td class="state" th:text="${ log.state }">더미</td>
+                <td>더미</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script>
+      $(".sort").each(function () {
+        if ($(this).text() == "매도") {
+          $(this).css("background-color", "blue");
+        }
+      });
+
+      $(".state").each(function () {
+        if ($(this).text() == "체결") {
+          $(this).css("background-color", "green");
+        }
+      });
+
+      $(".select_box").hover(
+        function () {
+          $(".option").css("display", "block");
+        },
+        function () {
+          $(".option").css("display", "none");
+        }
+      );
+      $(".wallet").click(function () {
+        optionNameChange(this);
+      });
+      $(".log").click(function () {
+        optionNameChange(this);
+      });
+      function optionNameChange(option) {
+        $(".option_selected").contents()[0].textContent = $(option).text();
+      }
+
+      //
+      $(".search").on("click", function () {
+        apiChooser();
+      });
+      function apiChooser() {
+        $("input[name = radio_check]").each(function () {
+          if ($(this).prop("checked")) {
+            value = $(this).val();
+          }
+        });
+        console.log(value);
+
+        let id = 0; // 나중에 설정해주기
+        $.ajax({
+          type: "GET",
+          async: false,
+          url: "/" + value + "/" + id + "/all-accounts",
+          error: function (e) {
+            alert("오류 발생");
+          },
+        });
+      }
+    </script>
+  </body>
+</html>

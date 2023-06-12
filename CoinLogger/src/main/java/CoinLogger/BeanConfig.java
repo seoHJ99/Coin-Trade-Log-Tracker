@@ -4,6 +4,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.boot.autoconfigure.influx.InfluxDbOkHttpClientBuilderProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,5 +21,9 @@ public class BeanConfig {
         return httpClient;
     }
 
+    @Bean
+    public JSONParser jsonParser(){
+        return new JSONParser();
+    }
 
 }

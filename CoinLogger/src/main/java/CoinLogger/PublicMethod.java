@@ -7,11 +7,9 @@ import java.util.List;
 @Component
 public class PublicMethod {
     // 받아온 데이터를 List 형태로 변환
-    //         1              2                  3         4            5              6
-    // 순서 : 이름, 보유 수량 중 주문 가능한 수량, 묶여있는 수량, 매수평균가, 매수평균가 수정여부, 평단가 기준 화폐
+
     public List<List<String>> jsonToList(String json){
         List<List<String>> resultList = new ArrayList<>();
-
         json = json.replaceAll("\\[","").replaceAll("]","");
         String[] list = json.replaceAll("\n","").split("}");
         for(int i = 0; i < list.length; i++){
@@ -28,10 +26,8 @@ public class PublicMethod {
                 rowData.add(partData[j].split(":")[1]);
             }
             resultList.add( rowData );
-
         }
         return resultList;
     }
-
 
 }

@@ -27,7 +27,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class UpbitService implements ApiService {
-
     private final JSONParser jsonParser;
     private final HttpSender httpSender;
     private final PublicMethod publicMethod;
@@ -39,7 +38,6 @@ public class UpbitService implements ApiService {
     public List<List<String>> getAccounts() throws IOException {
         String accessKey = ("jaGJ8xxzTrxrqJcMPxwGxeAstH38fjXRAYNemMal"); // 받아오기
         String secretKey = ("N8qFgecKx5B9s7HJJHexrADEDlT2znPSgTYENQCD"); // 받아오기
-
 
         httpSender.setServerUrl("https://api.upbit.com");
         httpSender.setApiRequest("/v1/accounts");
@@ -137,12 +135,10 @@ public class UpbitService implements ApiService {
         String authenticationToken = "Bearer " + jwtToken;
         String result = null;
         try {
-            HttpClient client = HttpClientBuilder.create().build();
             HttpGet request = new HttpGet(serverUrl + "/v1/orders?" + queryString);
             request.setHeader("Content-Type", "application/json");
             request.addHeader("Authorization", authenticationToken);
-
-            HttpResponse response = client.execute(request);
+            HttpResponse response = httpClient.execute(request);
             HttpEntity entity = response.getEntity();
             result = EntityUtils.toString(entity, "UTF-8");
         } catch (IOException e) {
@@ -160,7 +156,7 @@ public class UpbitService implements ApiService {
         for(int i =0; i< myCoinPrice.size(); i++){
             AccountDto_Upbit oneData = AccountDto_Upbit.builder().coinName(accounts.get(i).get(0))
                     .ownAmount(Double.valueOf(accounts.get(i).get(1)) + Double.valueOf(accounts.get(i).get(2)))
-                    .buyPrice(Integer.valueOf( accounts.get(i).get(3)))
+                    .buyPrice(Double.valueOf( accounts.get(i).get(3)))
                     .nowPrice( Math.floor( Double.valueOf( myCoinPrice.get(i))))
                     .build();
             oneData.setSumNowPrice( (int)( Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount() ));

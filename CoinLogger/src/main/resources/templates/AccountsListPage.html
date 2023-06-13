@@ -175,7 +175,11 @@
           <tr>
             <td th:text="${secondData['totalBuyPrice']}">더미</td>
             <td th:text="${secondData['totalNowPrice']}">더미</td>
-            <td th:text="${secondData['totalEarning']}">더미</td>
+            <td
+              th:text="${ #numbers.formatInteger(secondData['totalEarning'], 3, 'COMMA')}"
+            >
+              더미
+            </td>
             <td th:text="${secondData['avgRate'] + '%'}">더미</td>
           </tr>
         </table>
@@ -211,15 +215,24 @@
             value = $(this).val();
           }
         });
+        if ($(".option_selected").text() == "지갑 합계") {
+          option = "accounts";
+        } else {
+          option = "all-trade-log";
+        }
         console.log(value);
+        console.log(option);
 
         let id = 0; // 나중에 설정해주기
         $.ajax({
           type: "GET",
           async: false,
-          url: "/" + value + "/" + id + "/all-accounts",
+          url: "/" + value + "/" + id + "/" + option,
           error: function (e) {
             alert("오류 발생");
+          },
+          success: function (e) {
+            location.href = "/" + value + "/" + id + "/" + option;
           },
         });
       }

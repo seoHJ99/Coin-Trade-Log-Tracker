@@ -152,6 +152,14 @@
           <input type="radio" id="upbit" name="radio_check" value="upbit" />
           <label for="upbit">업비트</label>
         </span>
+        <span>
+          <input type="radio" id="coinone" name="radio_check" value="upbit" />
+          <label for="upbit">코인원</label>
+        </span>
+        <span>
+          <input type="radio" id="binance" name="radio_check" value="upbit" />
+          <label for="upbit">바이낸스</label>
+        </span>
         <button class="search">조회</button>
       </div>
       <div class="main">
@@ -234,15 +242,24 @@
             value = $(this).val();
           }
         });
+        if ($(".option_selected").text() == "지갑 합계") {
+          option = "accounts";
+        } else {
+          option = "all-trade-log";
+        }
         console.log(value);
+        console.log(option);
 
         let id = 0; // 나중에 설정해주기
         $.ajax({
           type: "GET",
           async: false,
-          url: "/" + value + "/" + id + "/all-accounts",
+          url: "/" + value + "/" + id + "/" + option,
           error: function (e) {
             alert("오류 발생");
+          },
+          success: function (e) {
+            location.href = "/" + value + "/" + id + "/" + option;
           },
         });
       }

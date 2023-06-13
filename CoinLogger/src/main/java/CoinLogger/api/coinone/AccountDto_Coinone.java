@@ -1,13 +1,13 @@
-package CoinLogger.api.upbit;
+package CoinLogger.api.coinone;
 
 import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@Builder
 @NoArgsConstructor
-public class AccountDto_Upbit {
+@Builder
+public class AccountDto_Coinone {
     private String coinName;
     private double ownAmount;
     private double nowPrice;

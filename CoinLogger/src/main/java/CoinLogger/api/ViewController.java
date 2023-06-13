@@ -9,7 +9,6 @@ import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -21,7 +20,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
-public class ApiController {
+public class ViewController {
     private final UpbitService upbit;
     @GetMapping("/upbit/{id}/accounts")
     public String getAllAccounts(Model model) throws IOException, ParseException {
@@ -36,7 +35,7 @@ public class ApiController {
            totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
            totalEarning += dto.getEarning();
            totalNowPrice += dto.getSumNowPrice();
-           if (dto.getRateOfReturn() >0) {
+           if (dto.getRateOfReturn() != 0) {
                rateCount++;
                avgRate += dto.getRateOfReturn();
            }

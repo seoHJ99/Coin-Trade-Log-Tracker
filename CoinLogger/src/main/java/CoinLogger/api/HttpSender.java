@@ -45,7 +45,6 @@ public class HttpSender {
         HttpResponse httpResponse = null;
         try {
             HttpGet request = new HttpGet(serverUrl + apiRequest);
-            request.setHeader("Content-Type", "application/json");
 
             Algorithm algorithm = Algorithm.HMAC256(secretKey);
             String jwtToken = JWT.create()
@@ -54,6 +53,7 @@ public class HttpSender {
                     .sign(algorithm);
 
             String authenticationToken = "Bearer " + jwtToken;
+            request.setHeader("Content-Type", "application/json");
             request.addHeader("Authorization", authenticationToken);
             httpResponse = httpClient.execute(request);
         }catch (IOException e){

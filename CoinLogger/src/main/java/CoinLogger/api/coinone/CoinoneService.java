@@ -154,7 +154,6 @@ public class CoinoneService {
             HttpResponse httpResponse = httpClient.execute(httpPost);
 
             result = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-            System.out.println(result);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -174,7 +173,6 @@ public class CoinoneService {
             String str = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             JSONObject jsonObject = (JSONObject) jsonParser.parse(str);
             JSONArray tickers = (JSONArray) jsonObject.get("tickers");
-            System.out.println(tickers.toString());
             for(int i =0; i<tickers.size(); i++){
                 JSONObject rowOne = (JSONObject)tickers.get(i);
                 coinMap.put(rowOne.get("target_currency").toString(), rowOne.get("last").toString());
@@ -219,29 +217,34 @@ public class CoinoneService {
         List<List<String>> accounts = getAccounts();
         Map<String, String> coinMap = getMyCoinPrice();
         for(int i =0; i< accounts.size(); i++){
-            System.out.println(accounts.get(i).get(3));
-            System.out.println(coinMap.get(accounts.get(i).get(3)));
             AccountDto_Coinone oneData = null;
-            if(coinMap.get(accounts.get(i).get(3)) == null){
-                oneData = AccountDto_Coinone.builder()
-                        .coinName(accounts.get(i).get(3))
-                        .ownAmount(Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1)))
-                        .buyPrice(Double.valueOf(accounts.get(i).get(2)))
-                        .nowPrice(0)
-                        .build();
-            }else {
-                 oneData = AccountDto_Coinone.builder()
-                        .coinName(accounts.get(i).get(3))
-                        .ownAmount(Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1)))
-                        .buyPrice(Integer.parseInt(accounts.get(i).get(2)))
-                        .nowPrice(Math.floor(Double.valueOf(coinMap.get(accounts.get(i).get(3)))))
-                        .build();
+            String coin = accounts.get(i).get(3);
+            Double amount = Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1));
+            if(amount ==0) {
+                continue;
             }
-            oneData.setSumNowPrice( (int)( Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount() ));
-            oneData.setEarning( (int)( (oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
-            double rate = (double) oneData.getEarning() / (oneData.getSumNowPrice() - oneData.getEarning()) * 100d;
-            oneData.setRateOfReturn( (Math.round(rate*100))/100d );
-            result.add(oneData);
+                if (coinMap.get(coin) == null) {
+                    oneData = AccountDto_Coinone.builder()
+                            .coinName(coin)
+                            .ownAmount(amount)
+                            .buyPrice(Double.valueOf(accounts.get(i).get(2)))
+                            .nowPrice(0)
+                            .build();
+                } else {
+                    oneData = AccountDto_Coinone.builder()
+                            .coinName(coin)
+                            .ownAmount(amount)
+                            .buyPrice(Integer.parseInt(accounts.get(i).get(2)))
+                            .nowPrice(Math.floor(Double.valueOf(coinMap.get(coin))))
+                            .build();
+                }
+            System.out.println(coin);
+                oneData.setSumNowPrice((int) (Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount()));
+                oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
+                double rate = (double) oneData.getEarning() / (oneData.getSumNowPrice() - oneData.getEarning()) * 100d;
+                oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
+
+                result.add(oneData);
         }
         return result;
     }

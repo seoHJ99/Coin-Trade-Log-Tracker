@@ -21,7 +21,6 @@ public class CoinoneController {
     public String getAccount() throws ParseException {
         List<AccountDto_Coinone> dtoList = new ArrayList<>();
         dtoList = coinoneService.accountDtoMaker();
-
-      return coinoneService.getAccounts().toString();
+      return dtoList.toString();
     }
 }

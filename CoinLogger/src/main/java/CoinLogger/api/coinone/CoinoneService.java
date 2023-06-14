@@ -40,7 +40,7 @@ public class CoinoneService {
     private final ObjectMapper om = new ObjectMapper();
 
     @Getter
-    static class Payload{
+    static class Payload {
         private final String access_token;
         private final String nonce;
         String to_trade_id;
@@ -64,7 +64,6 @@ public class CoinoneService {
     }
 
 
-
     // 아직 jsonToList 적용 전
     // 내 지갑
     // 1. 주문이 안걸린 잔고  2. 주문이 걸린 잔고   3. 평단가    4. 코인 이름
@@ -72,7 +71,7 @@ public class CoinoneService {
         String ENDPOINT = "https://api.coinone.co.kr/v2.1/account/balance/all";
         String nonce = UUID.randomUUID().toString();
         Payload payload = new Payload(ACCESS_TOKEN, nonce);
-        String  base64EncodedPayload = makeBase64EncodedPayload(payload);
+        String base64EncodedPayload = makeBase64EncodedPayload(payload);
         String signature = makeSignature(base64EncodedPayload);
         String result = "";
         try {
@@ -103,9 +102,9 @@ public class CoinoneService {
         String ENDPOINT = "https://api.coinone.co.kr/v2.1/order/completed_orders/all";
 
         Long startTime = System.currentTimeMillis();
-        Long endTime = startTime- 7_776_000_000L;
+        Long endTime = startTime - 7_776_000_000L;
         Payload payload = new Payload(ACCESS_TOKEN, nonce, null, 100, endTime, startTime);
-                                                             // 조회 개수  조회 시작 날짜   조회 끝 날짜
+        // 조회 개수  조회 시작 날짜   조회 끝 날짜
         String base64EncodedPayload = makeBase64EncodedPayload(payload);
         String signature = makeSignature(base64EncodedPayload);
         String result = "";
@@ -163,7 +162,7 @@ public class CoinoneService {
         return publicMethod.jsonToList(result);
     }
 
-    public Map<String, String> getMyCoinPrice() throws ParseException{
+    public Map<String, String> getMyCoinPrice() throws ParseException {
         Map<String, String> coinMap = new HashMap<>();
         String ENDPOINT = "https://api.coinone.co.kr/public/v2/ticker_new/KRW";
         try {
@@ -173,8 +172,8 @@ public class CoinoneService {
             String str = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             JSONObject jsonObject = (JSONObject) jsonParser.parse(str);
             JSONArray tickers = (JSONArray) jsonObject.get("tickers");
-            for(int i =0; i<tickers.size(); i++){
-                JSONObject rowOne = (JSONObject)tickers.get(i);
+            for (int i = 0; i < tickers.size(); i++) {
+                JSONObject rowOne = (JSONObject) tickers.get(i);
                 coinMap.put(rowOne.get("target_currency").toString(), rowOne.get("last").toString());
             }
         } catch (IOException e) {
@@ -216,38 +215,36 @@ public class CoinoneService {
         List<AccountDto_Coinone> result = new ArrayList<>();
         List<List<String>> accounts = getAccounts();
         Map<String, String> coinMap = getMyCoinPrice();
-        for(int i =0; i< accounts.size(); i++){
+        for (int i = 0; i < accounts.size(); i++) {
             AccountDto_Coinone oneData = null;
             String coin = accounts.get(i).get(3);
             Double amount = Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1));
-            if(amount ==0) {
+            if (amount == 0) {
                 continue;
             }
-                if (coinMap.get(coin) == null) {
-                    oneData = AccountDto_Coinone.builder()
-                            .coinName(coin)
-                            .ownAmount(amount)
-                            .buyPrice(Double.valueOf(accounts.get(i).get(2)))
-                            .nowPrice(0)
-                            .build();
-                } else {
-                    oneData = AccountDto_Coinone.builder()
-                            .coinName(coin)
-                            .ownAmount(amount)
-                            .buyPrice(Integer.parseInt(accounts.get(i).get(2)))
-                            .nowPrice(Math.floor(Double.valueOf(coinMap.get(coin))))
-                            .build();
-                }
-            System.out.println(coin);
-                oneData.setSumNowPrice((int) (Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount()));
-                oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
-                double rate = (double) oneData.getEarning() / (oneData.getSumNowPrice() - oneData.getEarning()) * 100d;
-                oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
-
-                result.add(oneData);
+            String price = coinMap.get(coin.toLowerCase());
+            if (price == null) {
+                oneData = AccountDto_Coinone.builder()
+                        .coinName(coin)
+                        .ownAmount(amount)
+                        .buyPrice(Double.valueOf(accounts.get(i).get(2)))
+                        .nowPrice(0)
+                        .build();
+            } else {
+                oneData = AccountDto_Coinone.builder()
+                        .coinName(coin)
+                        .ownAmount(amount)
+                        .buyPrice(Double.valueOf(accounts.get(i).get(2)))
+                        .nowPrice(Math.floor(Double.valueOf(price)))
+                        .build();
+            }
+            oneData.setSumNowPrice((int) (Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount()));
+            oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
+            double rate = (double) oneData.getEarning() / (oneData.getSumNowPrice() - oneData.getEarning()) * 100d;
+            oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
+            result.add(oneData);
         }
         return result;
     }
-
 }
 

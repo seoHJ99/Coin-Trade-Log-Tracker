@@ -157,7 +157,7 @@ public class UpbitService implements ApiService {
             AccountDto_Upbit oneData = AccountDto_Upbit.builder().coinName(accounts.get(i).get(0))
                     .ownAmount(Double.valueOf(accounts.get(i).get(1)) + Double.valueOf(accounts.get(i).get(2)))
                     .buyPrice(Double.valueOf( accounts.get(i).get(3)))
-                    .nowPrice( Math.floor( Double.valueOf( myCoinPrice.get(i))))
+                    .nowPrice( Double.valueOf( myCoinPrice.get(i)))
                     .build();
             oneData.setSumNowPrice( (int)( Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount() ));
             oneData.setEarning( (int)( (oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));

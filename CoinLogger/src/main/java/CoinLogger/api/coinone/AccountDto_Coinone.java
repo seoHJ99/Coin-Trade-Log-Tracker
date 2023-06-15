@@ -2,6 +2,8 @@ package CoinLogger.api.coinone;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -10,9 +12,13 @@ import lombok.*;
 public class AccountDto_Coinone {
     private String coinName;
     private double ownAmount;
+    private String bigAmount;
     private double nowPrice;
+    private String bigNow;
     private double buyPrice;
+    private String bigBuy;
     private int sumNowPrice;
+    private double sumBuyPrice;
     private int earning;
     private double rateOfReturn;
 }

@@ -9,10 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,17 +26,12 @@ public class CoinoneController {
         int totalNowPrice = 0;
         int totalEarning = 0;
         double avgRate = 0;
-        int rateCount = 0;
         for(AccountDto_Coinone dto : dtoList){
             totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
             totalEarning += dto.getEarning();
             totalNowPrice += dto.getSumNowPrice();
-            if (dto.getRateOfReturn() != 0) {
-                rateCount++;
-                avgRate += dto.getRateOfReturn();
-            }
         }
-        avgRate = avgRate/rateCount;
+        avgRate = (int)((double)totalEarning/totalBuyPrice * 10000d)/100d;
         secondData.put("totalBuyPrice", totalBuyPrice + "");
         secondData.put("totalNowPrice", totalNowPrice + "");
         secondData.put("totalEarning", totalEarning + "");
@@ -47,4 +40,5 @@ public class CoinoneController {
         model.addAttribute("secondData", secondData);
       return "AccountsListPage";
     }
+
 }

@@ -1,7 +1,7 @@
 package CoinLogger.api.coinone;
 
+import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
-import CoinLogger.api.upbit.AccountDto_Upbit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
@@ -21,17 +21,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.swing.text.html.parser.Entity;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
+import java.text.NumberFormat;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class CoinoneService {
 
+    private final NumberFormat numberFormat;
     private final PublicMethod publicMethod;
     private final JSONParser jsonParser;
     private final HttpClient httpClient = HttpClientBuilder.create().build();
@@ -218,32 +219,48 @@ public class CoinoneService {
         for (int i = 0; i < accounts.size(); i++) {
             AccountDto_Coinone oneData = null;
             String coin = accounts.get(i).get(3);
-            Double amount = Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1));
+            double amount = Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1));
+            double buyPrice = Double.parseDouble(accounts.get(i).get(2));
             if (amount == 0) {
                 continue;
             }
-            String price = coinMap.get(coin.toLowerCase());
-            if (price == null) {
+            String mapValue = coinMap.get(coin.toLowerCase());
+            double price;
+            if( mapValue == null){
+                price =0;
+            }else {
+                price = Double.parseDouble(mapValue);
+            }
+
+            if (price == 0) {
                 oneData = AccountDto_Coinone.builder()
                         .coinName(coin)
                         .ownAmount(amount)
-                        .buyPrice(Double.valueOf(accounts.get(i).get(2)))
+                        .bigAmount(BigDecimal.valueOf(amount).toPlainString())
+                        .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
+                        .bigNow(BigDecimal.valueOf(price).toPlainString())
+                        .buyPrice(Double.valueOf(numberFormat.format(buyPrice)))
                         .nowPrice(0)
                         .build();
             } else {
                 oneData = AccountDto_Coinone.builder()
                         .coinName(coin)
                         .ownAmount(amount)
-                        .buyPrice(Double.valueOf(accounts.get(i).get(2)))
-                        .nowPrice(Math.floor(Double.valueOf(price)))
+                        .bigAmount(BigDecimal.valueOf(amount).toPlainString())
+                        .buyPrice(Double.valueOf(buyPrice))
+                        .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
+                        .nowPrice(Double.valueOf(price))
+                        .bigNow(BigDecimal.valueOf(price).toPlainString())
                         .build();
             }
             oneData.setSumNowPrice((int) (Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount()));
             oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
-            double rate = (double) oneData.getEarning() / (oneData.getSumNowPrice() - oneData.getEarning()) * 100d;
+            double rate = (oneData.getNowPrice() / oneData.getBuyPrice() * 100d) - 100;
             oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
+            oneData.setSumBuyPrice(oneData.getSumNowPrice() + Math.abs(oneData.getEarning()));
             result.add(oneData);
         }
+        Collections.sort( result, new CoinSumBuyPriceComparator());
         return result;
     }
 }

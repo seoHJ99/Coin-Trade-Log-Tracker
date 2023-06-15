@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 
 @Configuration
 public class BeanConfig {
@@ -24,6 +25,13 @@ public class BeanConfig {
     @Bean
     public JSONParser jsonParser(){
         return new JSONParser();
+    }
+
+    @Bean
+    public NumberFormat numberFormat(){
+        NumberFormat numberFormat = NumberFormat.getInstance();
+        numberFormat.setGroupingUsed(false);
+        return numberFormat;
     }
 
 }

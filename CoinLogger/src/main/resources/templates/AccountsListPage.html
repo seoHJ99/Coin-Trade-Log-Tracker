@@ -78,7 +78,7 @@
         color: white;
       }
       .main {
-        min-width: 800px;
+        min-width: 950px;
       }
       table {
         width: 100%;
@@ -143,19 +143,25 @@
             <th>코인 이름</th>
             <th>보유 개수</th>
             <th>현재 가격</th>
-            <th>구매 가격</th>
-            <th>현재 보유 합계</th>
+            <th>매수 평균가</th>
+            <th>매수 금액</th>
+            <th>평가 금액</th>
             <th>수익 금액</th>
             <th>수익률</th>
             <th>거래소</th>
             <tr th:each="data : ${data}">
               <td th:text="${ data.coinName }">더미</td>
-              <td th:text="${ data.ownAmount }">더미</td>
-              <td th:text="${ data.nowPrice }">더미</td>
-              <td th:text="${ data.buyPrice }">더미</td>
-              <td th:text="${ data.sumNowPrice }">더미</td>
+              <td th:text="${data.bigAmount}">더미</td>
+              <td th:text="${ data.bigNow }">더미</td>
+              <td th:text="${ data.bigBuy }">더미</td>
+              <td th:text="${ #numbers.formatCurrency( data.sumBuyPrice ) }">
+                더미
+              </td>
+              <td th:text="${ #numbers.formatCurrency( data.sumNowPrice) }">
+                더미
+              </td>
               <td th:text="${ data.earning }">더미</td>
-              <td th:text="${ data.rateOfReturn + '%' }">더미</td>
+              <td class="rate" th:text="${ data.rateOfReturn + '%' }">더미</td>
               <td>더미</td>
             </tr>
           </table>
@@ -173,14 +179,22 @@
           <th>총 수익 금액</th>
           <th>총 수익률</th>
           <tr>
-            <td th:text="${secondData['totalBuyPrice']}">더미</td>
-            <td th:text="${secondData['totalNowPrice']}">더미</td>
+            <td
+              th:text="${ #numbers.formatInteger(secondData['totalBuyPrice'], 3, 'COMMA')}"
+            >
+              더미
+            </td>
+            <td
+              th:text="${ #numbers.formatInteger(secondData['totalNowPrice'], 3, 'COMMA')}"
+            >
+              더미
+            </td>
             <td
               th:text="${ #numbers.formatInteger(secondData['totalEarning'], 3, 'COMMA')}"
             >
               더미
             </td>
-            <td th:text="${secondData['avgRate'] + '%'}">더미</td>
+            <td class="rate" th:text="${secondData['avgRate'] + '%'}">더미</td>
           </tr>
         </table>
       </div>
@@ -204,6 +218,14 @@
       function optionNameChange(option) {
         $(".option_selected").contents()[0].textContent = $(option).text();
       }
+
+      $(".rate").each(function () {
+        if ($(this).text().indexOf("-") != -1) {
+          $(this).css("color", "blue");
+        } else if ($(this).text() != "0.0%") {
+          $(this).css("color", "red");
+        }
+      });
 
       //
       $(".search").on("click", function () {

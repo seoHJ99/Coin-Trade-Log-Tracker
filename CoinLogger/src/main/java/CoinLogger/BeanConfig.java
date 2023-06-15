@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Configuration
 public class BeanConfig {
@@ -21,7 +24,6 @@ public class BeanConfig {
         HttpClient httpClient = HttpClientBuilder.create().build();
         return httpClient;
     }
-
     @Bean
     public JSONParser jsonParser(){
         return new JSONParser();

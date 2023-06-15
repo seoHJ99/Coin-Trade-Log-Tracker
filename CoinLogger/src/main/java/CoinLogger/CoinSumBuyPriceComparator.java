@@ -1,12 +1,13 @@
 package CoinLogger;
 
+import CoinLogger.api.AccountDto;
 import CoinLogger.api.coinone.AccountDto_Coinone;
 
 import java.util.Comparator;
 
-public class CoinSumBuyPriceComparator implements Comparator<AccountDto_Coinone> {
+public class CoinSumBuyPriceComparator implements Comparator<AccountDto> {
     @Override
-    public int compare(AccountDto_Coinone o1, AccountDto_Coinone o2) {
+    public int compare(AccountDto o1, AccountDto o2) {
         if(o1.getCoinName().equals("KRW")){
             return 1;
         }else if(o2.getCoinName().equals("KRW")){

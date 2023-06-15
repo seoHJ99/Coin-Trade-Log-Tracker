@@ -1,6 +1,7 @@
 package CoinLogger.api;
 
 
+import CoinLogger.api.coinone.AccountDto_Coinone;
 import CoinLogger.api.upbit.AccountDto_Upbit;
 import CoinLogger.api.upbit.LogDto_Upbit;
 import CoinLogger.api.upbit.UpbitService;
@@ -30,17 +31,12 @@ public class ViewController {
         int totalNowPrice = 0;
         int totalEarning = 0;
         double avgRate = 0;
-        int rateCount = 0;
         for(AccountDto_Upbit dto : dtoList){
-           totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
-           totalEarning += dto.getEarning();
-           totalNowPrice += dto.getSumNowPrice();
-           if (dto.getRateOfReturn() != 0) {
-               rateCount++;
-               avgRate += dto.getRateOfReturn();
-           }
+            totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
+            totalEarning += dto.getEarning();
+            totalNowPrice += dto.getSumNowPrice();
         }
-        avgRate = avgRate/rateCount;
+        avgRate = (int)((double)totalEarning/totalBuyPrice * 10000d)/100d;
         secondData.put("totalBuyPrice", totalBuyPrice + "");
         secondData.put("totalNowPrice", totalNowPrice + "");
         secondData.put("totalEarning", totalEarning + "");
@@ -57,8 +53,7 @@ public class ViewController {
         List<List<String>> allLog = upbit.getOrders();
          for(int i =0; i<allLog.size(); i++){
              LogDto_Upbit logDto = LogDto_Upbit.builder()
-                     .orderTime(allLog.get(i).get(6))
-//                     .orderSort(allLog.get(i).get(1))
+//                     .orderTime(allLog.get(i).get(6))
                      .coinName(allLog.get(i).get(5))
                      .thatTimePrice(allLog.get(i).get(3))
                      .orderAmount(allLog.get(i).get(7))

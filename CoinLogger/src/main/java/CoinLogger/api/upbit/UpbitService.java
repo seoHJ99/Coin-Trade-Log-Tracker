@@ -1,9 +1,11 @@
 package CoinLogger.api.upbit;
 
 
+import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
 import CoinLogger.api.ApiService;
 import CoinLogger.api.HttpSender;
+import CoinLogger.api.coinone.AccountDto_Coinone;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -153,18 +156,45 @@ public class UpbitService implements ApiService {
         List<AccountDto_Upbit> result = new ArrayList<>();
         List<List<String>> accounts = getAccounts();
         List<String> myCoinPrice = getMyCoinPrice();
-        for(int i =0; i< myCoinPrice.size(); i++){
-            AccountDto_Upbit oneData = AccountDto_Upbit.builder().coinName(accounts.get(i).get(0))
-                    .ownAmount(Double.valueOf(accounts.get(i).get(1)) + Double.valueOf(accounts.get(i).get(2)))
-                    .buyPrice(Double.valueOf( accounts.get(i).get(3)))
-                    .nowPrice( Double.valueOf( myCoinPrice.get(i)))
-                    .build();
-            oneData.setSumNowPrice( (int)( Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount() ));
-            oneData.setEarning( (int)( (oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
-            double rate = (double) oneData.getEarning() / (oneData.getSumNowPrice() - oneData.getEarning()) * 100d;
-            oneData.setRateOfReturn( (Math.round(rate*100))/100d );
+        for (int i = 0; i < accounts.size(); i++) {
+            AccountDto_Upbit oneData = null;
+            String coin = accounts.get(i).get(3);
+            double amount = Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1));
+            double buyPrice = Double.parseDouble(accounts.get(i).get(2));
+            double price = Double.valueOf(myCoinPrice.get(i));
+            if (amount == 0) {
+                continue;
+            }
+
+            if (price == 0) {
+                oneData = AccountDto_Upbit.builder()
+                        .coinName(coin)
+                        .ownAmount(amount)
+                        .bigAmount(BigDecimal.valueOf(amount).toPlainString())
+                        .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
+                        .bigNow(BigDecimal.valueOf(price).toPlainString())
+                        .buyPrice(buyPrice)
+                        .nowPrice(0)
+                        .build();
+            } else {
+                oneData = AccountDto_Upbit.builder()
+                        .coinName(coin)
+                        .ownAmount(amount)
+                        .bigAmount(BigDecimal.valueOf(amount).toPlainString())
+                        .buyPrice(buyPrice)
+                        .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
+                        .nowPrice(price)
+                        .bigNow(BigDecimal.valueOf(price).toPlainString())
+                        .build();
+            }
+            oneData.setSumNowPrice((int) (Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount()));
+            oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
+            double rate = (oneData.getNowPrice() / oneData.getBuyPrice() * 100d) - 100;
+            oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
+            oneData.setSumBuyPrice(oneData.getSumNowPrice() + Math.abs(oneData.getEarning()));
             result.add(oneData);
         }
+        Collections.sort( result, new CoinSumBuyPriceComparator());
         return result;
     }
 

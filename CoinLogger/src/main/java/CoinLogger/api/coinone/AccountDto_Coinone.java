@@ -1,5 +1,6 @@
 package CoinLogger.api.coinone;
 
+import CoinLogger.api.AccountDto;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -9,7 +10,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AccountDto_Coinone {
+public class AccountDto_Coinone implements AccountDto {
     private String coinName;
     private double ownAmount;
     private String bigAmount;

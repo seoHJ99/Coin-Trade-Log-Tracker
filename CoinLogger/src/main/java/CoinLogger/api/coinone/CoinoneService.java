@@ -2,6 +2,8 @@ package CoinLogger.api.coinone;
 
 import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
+import CoinLogger.api.LogDto;
+import CoinLogger.api.OrderTimeComparator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
@@ -25,14 +27,15 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class CoinoneService {
 
-    private final NumberFormat numberFormat;
     private final PublicMethod publicMethod;
     private final JSONParser jsonParser;
     private final HttpClient httpClient = HttpClientBuilder.create().build();
@@ -95,10 +98,59 @@ public class CoinoneService {
         return publicMethod.jsonToList(result);
     }
 
+    public List<LogDto> getAllLog() throws ParseException {
+        List<List<String>> notDone = getNotDoneOrder();
+        List<List<String>> done  = getDoneOrder();
+        List<LogDto> result = new ArrayList<>();
+
+        if(!notDone.get(0).isEmpty()) {
+            for (int i = 0; i < notDone.size(); i++) {
+                Long milliSec = Long.valueOf(notDone.get(i).get(10));
+                LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliSec), ZoneId.systemDefault());
+                LogDto_Coinone oneData = LogDto_Coinone.builder()
+                        .state("waiting")
+                        .orderAmount(notDone.get(i).get(7))
+                        .orderSort(notDone.get(i).get(4))
+                        .remainAmount(notDone.get(i).get(6))
+                        .signedAmount(notDone.get(i).get(9))
+                        .thatTimePrice(notDone.get(i).get(13))
+                        .orderTime(time)
+                        .coinName(notDone.get(i).get(3))
+                        .build();
+                result.add(oneData);
+            }
+        }
+
+        for(int i = 0; i < done.size(); i++){
+            Long milliSec = Long.valueOf(done.get(i).get(12));
+            LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliSec), ZoneId.systemDefault());
+            String sort = "";
+            if(done.get(i).get(5).equals("true")){
+                sort = "매도";
+            }else {
+                sort = "매수";
+            }
+            LogDto_Coinone oneData = LogDto_Coinone.builder()
+                    .state("done")
+                    .orderAmount(done.get(i).get(8))
+                    .orderSort(sort)
+                    .coinName(done.get(i).get(0))
+                    .remainAmount("0")
+                    .signedAmount(done.get(i).get(8))
+                    .thatTimePrice(done.get(i).get(7))
+                    .orderTime(time)
+                    .build();
+            result.add( oneData);
+
+        }
+        Collections.sort(result, new OrderTimeComparator());
+        return result;
+    }
+
     // 과거 체결 내역 조회                 market : 시장가    limit : 이득으로 걸어둠    limit stop : 손해로 걸어둠
     // 1. 체결 id    2. 주문id   3.마켓 기준 통화(KRW)   4.주문 체결된 코인   5.주문방식??   6. 매도 주문인지   7. 마켓주문여부
     // 8. 체결된 금액  9. 시간    10. 수수료
-    public List<List<String>> getAllTradeLog() throws ParseException {
+    public List<List<String>> getDoneOrder() throws ParseException {
         String nonce = UUID.randomUUID().toString();
         String ENDPOINT = "https://api.coinone.co.kr/v2.1/order/completed_orders/all";
 
@@ -141,7 +193,6 @@ public class CoinoneService {
         String base64EncodedPayload = makeBase64EncodedPayload(payload);
         String signature = makeSignature(base64EncodedPayload);
         String result = "";
-
         try {
             HttpPost httpPost = new HttpPost(ENDPOINT);
             String body = om.writeValueAsString(payload);
@@ -152,17 +203,16 @@ public class CoinoneService {
             StringEntity requestEntity = new StringEntity(body);
             httpPost.setEntity(requestEntity);
             HttpResponse httpResponse = httpClient.execute(httpPost);
-
             result = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
         result = jsonObject.get("open_orders").toString();
-
         return publicMethod.jsonToList(result);
     }
 
+    // 내 코인 현재 가격 정보 가져오기
     public Map<String, String> getMyCoinPrice() throws ParseException {
         Map<String, String> coinMap = new HashMap<>();
         String ENDPOINT = "https://api.coinone.co.kr/public/v2/ticker_new/KRW";
@@ -211,7 +261,6 @@ public class CoinoneService {
         }
     }
 
-
     public List<AccountDto_Coinone> accountDtoMaker() throws ParseException {
         List<AccountDto_Coinone> result = new ArrayList<>();
         List<List<String>> accounts = getAccounts();
@@ -239,7 +288,7 @@ public class CoinoneService {
                         .bigAmount(BigDecimal.valueOf(amount).toPlainString())
                         .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
                         .bigNow(BigDecimal.valueOf(price).toPlainString())
-                        .buyPrice(Double.valueOf(numberFormat.format(buyPrice)))
+                        .buyPrice(buyPrice)
                         .nowPrice(0)
                         .build();
             } else {

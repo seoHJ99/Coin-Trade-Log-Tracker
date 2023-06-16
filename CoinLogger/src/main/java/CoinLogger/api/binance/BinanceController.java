@@ -30,15 +30,13 @@ public class BinanceController {
 
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
-        String secretKey = "";
-        String accessKey = "";
+        String secretKey = "o3qjLnuwzNFkh2RQRr8wRCpR8pYqMC1Dt7fF1B9T6xggn73ksNAQSmBUTeeRzpUL";
+        String accessKey = "lTJrdh5xuwUhaeUiYHNP3pMYP7MEPKoDM3h9L4Ka6jy7VZiBlKXPbHKNDh7UuFME";
         Mac hmacSha256 = Mac.getInstance("HmacSHA256");
         SecretKeySpec secKey = new SecretKeySpec(secretKey.getBytes(), "HmacSHA256");
         hmacSha256.init(secKey);
 
-
-
-        String actualSign = new String(Hex.encodeHex(hmacSha256.doFinal(secretKey.getBytes())));
+        String actualSign = new String(Hex.encodeHex(hmacSha256.doFinal(.getBytes())));
         secretKey = "&signature=" + actualSign;
         String timestamp = Long.toString(System.currentTimeMillis());
         timestamp = "timestamp=" + timestamp;

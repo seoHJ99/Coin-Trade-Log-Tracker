@@ -21,5 +21,6 @@ public class LogDto_Upbit implements LogDto {
     private String remainAmount;
     private String state;
     private String timeStr;
+    private String trader;
 
 }

@@ -20,4 +20,5 @@ public class AccountDto_Upbit implements AccountDto {
     private double sumBuyPrice;
     private int earning;
     private double rateOfReturn;
+    private String trader;
 }

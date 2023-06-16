@@ -23,6 +23,7 @@ public class LogDto_Coinone implements LogDto {
     private String state;
 
     private String timeStr;
+    private String trader;
 
     @Override
     public String getTimeStr() {

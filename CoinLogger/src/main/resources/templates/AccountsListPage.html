@@ -94,6 +94,9 @@
         max-height: 800px;
         overflow: auto;
       }
+      .trader {
+        width: 50px;
+      }
     </style>
   </head>
   <body>
@@ -162,7 +165,7 @@
               </td>
               <td th:text="${ data.earning }">더미</td>
               <td class="rate" th:text="${ data.rateOfReturn + '%' }">더미</td>
-              <td>더미</td>
+              <td><img class="trader" th:src="${data.trader}" alt="" /></td>
             </tr>
           </table>
         </div>

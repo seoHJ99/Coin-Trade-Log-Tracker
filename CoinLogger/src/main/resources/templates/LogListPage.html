@@ -121,6 +121,9 @@
         background-color: black;
         color: white;
       }
+      .trader {
+        width: 50px;
+      }
     </style>
   </head>
   <body>
@@ -193,7 +196,11 @@
                 <td th:text="${ log.signedAmount }">더미</td>
                 <!-- <td th:text="${ log.remainAmount }">더미</td> -->
                 <td class="state" th:text="${ log.state }">더미</td>
-                <td>더미</td>
+                <td height="0">
+                  <picture>
+                    <img class="trader" th:src="${log.trader}" alt="" />
+                  </picture>
+                </td>
               </tr>
             </table>
           </div>
@@ -247,8 +254,6 @@
         } else {
           option = "all-trade-log";
         }
-        console.log(value);
-        console.log(option);
 
         let id = 0; // 나중에 설정해주기
         $.ajax({

@@ -15,8 +15,10 @@ public interface LogDto {
        String remainAmount= null;
        String state= null;
        String timeStr = null;
+       String trader = null;
 
        String getTimeStr();
+       String getTrader();
 
        LocalDateTime getOrderTime();
        String getOrderSort();

@@ -116,6 +116,7 @@ public class CoinoneService {
                         .thatTimePrice(notDone.get(i).get(13))
                         .orderTime(time)
                         .coinName(notDone.get(i).get(3))
+                        .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
                         .build();
                 result.add(oneData);
             }
@@ -137,6 +138,7 @@ public class CoinoneService {
                     .coinName(done.get(i).get(0))
                     .remainAmount("0")
                     .signedAmount(done.get(i).get(8))
+                    .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
                     .thatTimePrice(done.get(i).get(7))
                     .orderTime(time)
                     .build();
@@ -290,6 +292,7 @@ public class CoinoneService {
                         .bigNow(BigDecimal.valueOf(price).toPlainString())
                         .buyPrice(buyPrice)
                         .nowPrice(0)
+                        .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
                         .build();
             } else {
                 oneData = AccountDto_Coinone.builder()
@@ -298,6 +301,7 @@ public class CoinoneService {
                         .bigAmount(BigDecimal.valueOf(amount).toPlainString())
                         .buyPrice(Double.valueOf(buyPrice))
                         .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
+                        .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
                         .nowPrice(Double.valueOf(price))
                         .bigNow(BigDecimal.valueOf(price).toPlainString())
                         .build();

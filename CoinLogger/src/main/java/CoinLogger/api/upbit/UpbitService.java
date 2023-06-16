@@ -165,7 +165,6 @@ public class UpbitService implements ApiService {
             if (amount == 0) {
                 continue;
             }
-
             if (price == 0) {
                 oneData = AccountDto_Upbit.builder()
                         .coinName(coin)
@@ -187,6 +186,7 @@ public class UpbitService implements ApiService {
                         .bigNow(BigDecimal.valueOf(price).toPlainString())
                         .build();
             }
+            oneData.setTrader("https://files.readme.io/40e45a0-small-upbit_color.png");
             oneData.setSumNowPrice((int) (Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount()));
             oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
             double rate = (oneData.getNowPrice() / oneData.getBuyPrice() * 100d) - 100;

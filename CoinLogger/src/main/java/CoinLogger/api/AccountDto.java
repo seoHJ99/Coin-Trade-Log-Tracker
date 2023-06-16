@@ -13,6 +13,7 @@ public interface AccountDto {
     double sumBuyPrice= 0;
     int earning= 0;
     double rateOfReturn= 0;
+    String trader = null;
 
     String getCoinName();
     double getOwnAmount();
@@ -25,5 +26,6 @@ public interface AccountDto {
     double getSumBuyPrice();
     int getEarning();
     double getRateOfReturn();
+
 
 }

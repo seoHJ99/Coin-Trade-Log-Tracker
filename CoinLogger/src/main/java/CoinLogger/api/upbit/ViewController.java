@@ -1,4 +1,4 @@
-package CoinLogger.api;
+package CoinLogger.api.upbit;
 
 
 import CoinLogger.api.coinone.AccountDto_Coinone;
@@ -59,6 +59,7 @@ public class ViewController {
                      .orderAmount(allLog.get(i).get(7))
                      .signedAmount(allLog.get(i).get(13))
                      .remainAmount(allLog.get(i).get(8))
+                     .trader("https://files.readme.io/40e45a0-small-upbit_color.png")
                      .build();
              if(allLog.get(i).get(1).equals("bid")){
                  logDto.setOrderSort("매수");

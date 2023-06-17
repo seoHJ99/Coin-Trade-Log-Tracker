@@ -36,7 +36,7 @@ public class BinanceController {
         SecretKeySpec secKey = new SecretKeySpec(secretKey.getBytes(), "HmacSHA256");
         hmacSha256.init(secKey);
 
-        String actualSign = new String(Hex.encodeHex(hmacSha256.doFinal(.getBytes())));
+        String actualSign = new String(Hex.encodeHex(hmacSha256.doFinal()));
         secretKey = "&signature=" + actualSign;
         String timestamp = Long.toString(System.currentTimeMillis());
         timestamp = "timestamp=" + timestamp;

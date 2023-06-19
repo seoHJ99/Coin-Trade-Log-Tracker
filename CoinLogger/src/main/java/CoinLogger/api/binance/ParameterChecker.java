@@ -1,7 +1,6 @@
 package CoinLogger.api.binance;
 
 import org.json.JSONObject;
-import org.json.simple.JSONObject;
 
 import java.util.Arrays;
 import java.util.Map;

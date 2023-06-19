@@ -48,28 +48,30 @@ public class BinanceController {
         String serverUrl = "https://api.binance.com";
 
         HttpClient client = HttpClientBuilder.create().build();
-        HttpGet request = new HttpGet(serverUrl + "/sapi/v1/capital/config/getall?"+ queryString + "&signature=" + actualSign);
+        HttpPost request = new HttpPost(serverUrl + "/sapi/v3/asset/getUserAsset?" + queryString + "&signature="+actualSign);
         System.out.println(signature.getSignature(secretKey));
         request.addHeader("Content-Type", "application/json");
         request.addHeader("X-MBX-APIKEY", accessKey);
+
 
         HttpResponse response = client.execute(request);
         HttpEntity entity = response.getEntity();;
 
         String entityString = EntityUtils.toString(entity, "UTF-8");
+        System.out.println(entityString);
         JSONParser jsonParser = new JSONParser();
-        JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
+//        JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
 
-        PublicMethod publicMethod = new PublicMethod();
-        String a = "";
-        for(int i =0; i<jsonArray.size(); i++){
-            JSONObject jsonObject =(JSONObject) jsonParser.parse(jsonArray.get(i).toString());
-//            a = jsonObject.get("networkList").toString();
-            a += jsonObject.toJSONString();
-        }
-        System.out.println(a);
-        publicMethod.jsonToList(a);
-
-
+//        PublicMethod publicMethod = new PublicMethod();
+//        String a = "";
+//        for(int i =0; i<jsonArray.size(); i++){
+//            JSONObject jsonObject =(JSONObject) jsonParser.parse(jsonArray.get(i).toString());
+////            a = jsonObject.get("networkList").toString();
+//            a += jsonObject.toJSONString();
+//        }
+//        System.out.println(a);
+//        publicMethod.jsonToList(a);
+//
+//
     }
 }

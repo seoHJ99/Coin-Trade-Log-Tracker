@@ -36,30 +36,7 @@ public class BinanceController {
 
 
     public static void main(String[] args) throws IOException, ParseException {
-        String secretKey = "";
-        String accessKey = "";
 
-        HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
-
-        String timestamp = Long.toString(System.currentTimeMillis());
-        String queryString = "timestamp=" + timestamp;
-        String actualSign = signature.getSignature(queryString);
-
-        String serverUrl = "https://api.binance.com";
-
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpPost request = new HttpPost(serverUrl + "/sapi/v3/asset/getUserAsset?" + queryString + "&signature="+actualSign);
-        System.out.println(signature.getSignature(secretKey));
-        request.addHeader("Content-Type", "application/json");
-        request.addHeader("X-MBX-APIKEY", accessKey);
-
-
-        HttpResponse response = client.execute(request);
-        HttpEntity entity = response.getEntity();;
-
-        String entityString = EntityUtils.toString(entity, "UTF-8");
-        System.out.println(entityString);
-        JSONParser jsonParser = new JSONParser();
 //        JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
 
 //        PublicMethod publicMethod = new PublicMethod();

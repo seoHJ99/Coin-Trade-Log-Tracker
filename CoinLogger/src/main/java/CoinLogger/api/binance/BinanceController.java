@@ -18,6 +18,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -32,23 +34,12 @@ import java.util.UUID;
 @Controller
 @RequiredArgsConstructor
 public class BinanceController {
+    private final BinanceService binanceService;
 
-
-
-    public static void main(String[] args) throws IOException, ParseException {
-
-//        JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
-
-//        PublicMethod publicMethod = new PublicMethod();
-//        String a = "";
-//        for(int i =0; i<jsonArray.size(); i++){
-//            JSONObject jsonObject =(JSONObject) jsonParser.parse(jsonArray.get(i).toString());
-////            a = jsonObject.get("networkList").toString();
-//            a += jsonObject.toJSONString();
-//        }
-//        System.out.println(a);
-//        publicMethod.jsonToList(a);
-//
-//
+    @GetMapping("/binance/{id}/account")
+    public String getAccount(Model model) throws IOException, ParseException {
+        List<List<String>> a = binanceService.getAccountCoin();
+        binanceService.coinBTCValueToWon(a);
+        return "AccountsListPage";
     }
 }

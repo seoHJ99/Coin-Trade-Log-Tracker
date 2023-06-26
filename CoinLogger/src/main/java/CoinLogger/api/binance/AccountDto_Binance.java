@@ -1,11 +1,15 @@
 package CoinLogger.api.binance;
 
 import CoinLogger.api.AccountDto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 public class AccountDto_Binance implements AccountDto {
     String coinName ;
     double ownAmount= 0;

@@ -38,8 +38,7 @@ public class BinanceController {
 
     @GetMapping("/binance/{id}/account")
     public String getAccount(Model model) throws IOException, ParseException {
-        List<List<String>> a = binanceService.getAccountCoin();
-        binanceService.coinBTCValueToWon(a);
+        binanceService.makeAccountDto();
         return "AccountsListPage";
     }
 }

@@ -52,26 +52,28 @@ public class BinanceService {
 
         String entityString = EntityUtils.toString(entity, "UTF-8");
         List<List<String>> result = publicMethod.jsonToList(entityString);
-        System.out.println(entityString);
         return result;
     }
 
-//
-//    public double getBTCValue() throws IOException, ParseException {
-//        HttpGet request = new HttpGet(serverUrl + "/api/v3/avgPrice?symbol=BTCUSDT");
-//        request.addHeader("Content-Type", "application/json");
-//        request.addHeader("X-MBX-APIKEY", accessKey);
-//        HttpResponse response = httpClient.execute(request);
-//        HttpEntity entity = response.getEntity();
-//        String result = EntityUtils.toString(entity, "UTF-8");
-//        JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
-//        jsonObject = new JSONObject(jsonObject);
-//        return Double.valueOf((String) jsonObject.get("price"));
-//    }
-    // 코인 이름으로 차트 조회 돌아야 할듯.
-    // 계좌 정보 가져오기는 실시간 변동이 안됨
 
-   public void coinBTCValueToWon(List<List<String>> myCoin) throws IOException, ParseException {
+    public double getCoinPrice(String coinName) throws IOException, ParseException {
+        HttpGet request = new HttpGet(serverUrl + "/api/v3/avgPrice?symbol=" +coinName+ "USDT");
+        request.addHeader("Content-Type", "application/json");
+        request.addHeader("X-MBX-APIKEY", accessKey);
+        HttpResponse response = httpClient.execute(request);
+        HttpEntity entity = response.getEntity();
+        String json = EntityUtils.toString(entity, "UTF-8");
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(json);
+        jsonObject = new JSONObject(jsonObject);
+        double result = 0;
+        if(jsonObject.containsKey("price")) {
+            result = Double.valueOf((String) jsonObject.get("price"));
+        }
+        return result ;
+    }
+
+   public List<AccountDto_Binance> makeAccountDto() throws IOException, ParseException {
+       List<List<String>> myCoin = getAccountCoin();
         if(oneDollarWon == 0){
             HttpGet request = new HttpGet("https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD");
             request.addHeader("Content-Type", "application/json");
@@ -83,15 +85,20 @@ public class BinanceService {
             JSONObject a = (JSONObject)jsonObject.get(0);
             oneDollarWon = (double) a.get("basePrice");
         }
-//        double btc = getBTCValue();
+        double sumNowPriceWon;
+        List<AccountDto_Binance> dtoList = new ArrayList<>();
         for(int i =0; i<myCoin.size(); i++){
-            double coinBtcValue = Double.valueOf( myCoin.get(i).get(6));
-            System.out.println(myCoin.get(i).get(0));
-            System.out.println("coinBtcValue = " + coinBtcValue);
-//            double price = btc  * coinBtcValue;
-//            System.out.println("price = " + price);
-
+            double coinPrice = getCoinPrice(myCoin.get(i).get(0));
+            double coinAmount = Double.valueOf(myCoin.get(i).get(1));
+            sumNowPriceWon = coinPrice * oneDollarWon * coinAmount;
+            AccountDto_Binance dto = AccountDto_Binance.builder()
+                    .coinName(myCoin.get(i).get(0))
+                    .nowPrice( coinPrice * oneDollarWon)
+                    .ownAmount(coinAmount)
+                    .sumNowPrice((int)sumNowPriceWon)
+                    .build();
+            dtoList.add(dto);
         }
-        return ;
+        return dtoList;
    }
 }

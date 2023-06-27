@@ -39,6 +39,7 @@ public class BinanceController {
     @GetMapping("/binance/{id}/account")
     public String getAccount(Model model) throws IOException, ParseException {
         binanceService.makeAccountDto();
+        binanceService.getTradeLog();
         return "AccountsListPage";
     }
 }

@@ -35,6 +35,36 @@ public class BinanceService {
     String secretKey = "";
     String accessKey = "";
     String serverUrl = "https://api.binance.com";
+
+
+    public void getTradeLog() throws IOException {
+//        GET /api/v3/aggTrades
+        // 조사 결과 바이낸스는 최근 거래내역을 전부 가져오는 api는 없고
+        // 최근 단일 코인 거래기록을 가져오는 api만 존재함.
+        // 내 소유 코인이 아닌, 과거 보유했던 코인의 거래기록을 조회할 방법을 생각해야 함.
+        // 현재 내 api키는 읽기만 허용해둔 상태인데, 거래기록 가져오는 것은 거래까지 허용해야 가능한것 같음.
+        // 바꾸고 재시도
+
+        String timestamp = Long.toString(System.currentTimeMillis());
+        String queryString = "timestamp=" + timestamp;
+        HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
+        String actualSign = signature.getSignature(queryString);
+
+        HttpGet request = new HttpGet(serverUrl + "/api/v3/allOrders?"
+                + queryString + "&symbol=BTCUSDT" + "&signature=" + actualSign);
+
+        request.addHeader("Content-Type", "application/json");
+        request.addHeader("X-MBX-APIKEY", accessKey);
+
+        HttpResponse response = httpClient.execute(request);
+        HttpEntity entity = response.getEntity();;
+
+        String entityString = EntityUtils.toString(entity, "UTF-8");
+        System.out.println(entityString);
+        List<List<String>> result = publicMethod.jsonToList(entityString);
+
+    }
+
     public List<List<String>> getAccountCoin() throws IOException, ParseException {
 
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
@@ -43,7 +73,9 @@ public class BinanceService {
         String queryString = "timestamp=" + timestamp;
         String actualSign = signature.getSignature(queryString);
 
-        HttpPost request = new HttpPost(serverUrl + "/sapi/v3/asset/getUserAsset?" + queryString + "&signature="+actualSign);
+        HttpPost request = new HttpPost(serverUrl + "/sapi/v3/asset/getUserAsset?"
+                + queryString + "&signature="+actualSign);
+
         request.addHeader("Content-Type", "application/json");
         request.addHeader("X-MBX-APIKEY", accessKey);
 
@@ -51,6 +83,7 @@ public class BinanceService {
         HttpEntity entity = response.getEntity();;
 
         String entityString = EntityUtils.toString(entity, "UTF-8");
+        System.out.println("entityString = " + entityString);
         List<List<String>> result = publicMethod.jsonToList(entityString);
         return result;
     }

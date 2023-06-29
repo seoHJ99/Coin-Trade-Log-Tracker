@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +34,10 @@ public class BinanceService {
     String serverUrl = "https://api.binance.com";
 
 
-    public void getOneCoinTradeLog(String coinName) throws IOException {
+    public void getOneCoinTradeLog(String coinName) throws IOException, ParseException {
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
-        String timestamp = Long.toString(System.currentTimeMillis());
+        String timestamp = Long.toString(System.currentTimeMillis() + 5000);
         String queryString = "timestamp=" + timestamp + "&symbol="+ coinName +"USDT" ;
         String actualSign = signature.getSignature(queryString);
 
@@ -55,16 +52,32 @@ public class BinanceService {
         HttpEntity entity = response.getEntity();;
 
         String entityString = EntityUtils.toString(entity, "UTF-8");
-        System.out.println("entityString = " + entityString);
-        List<List<String>> result = publicMethod.jsonToList(entityString);
 
+        if(!entityString.contains("code")){
+            JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
+            Stack<JSONObject> stack = new Stack<>();
+            for(int i=0; i<jsonArray.size(); i++){
+                stack.push((JSONObject) jsonArray.get(i));
+            }
+            System.out.println(coinName);
+            for(int i=0; i<stack.size(); i++){
+                stack.pop().get();
+            }
+        }
+
+
+//        List<List<String>> result = publicMethod.jsonToList(entityString);
+//        Stack<List<String>> test = new Stack<>();
+//        for(int i =0; i<result.size(); i++){
+//            test.push(result.get(i));
+//        }
     }
 
     public List<List<String>> getAccountCoin() throws IOException, ParseException {
 
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
-        String timestamp = Long.toString(System.currentTimeMillis());
+        String timestamp = Long.toString(System.currentTimeMillis() + 5000);
         String queryString = "timestamp=" + timestamp;
         String actualSign = signature.getSignature(queryString);
 
@@ -78,6 +91,7 @@ public class BinanceService {
         HttpEntity entity = response.getEntity();;
 
         String entityString = EntityUtils.toString(entity, "UTF-8");
+        System.out.println("entityString = " + entityString);
         List<List<String>> result = publicMethod.jsonToList(entityString);
         return result;
     }
@@ -85,7 +99,7 @@ public class BinanceService {
     public List<String> getMyCoinName() throws IOException {
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
-        String timestamp = Long.toString(System.currentTimeMillis());
+        String timestamp = Long.toString(System.currentTimeMillis() + 5000);
         String queryString = "timestamp=" + timestamp;
         String actualSign = signature.getSignature(queryString);
 
@@ -108,7 +122,7 @@ public class BinanceService {
         return coinNames;
     }
 
-    public void getAllCoinLog() throws IOException {
+    public void getAllCoinLog() throws IOException, ParseException {
         List<String> coinNames = getMyCoinName();
         for(int i =0; i<coinNames.size(); i++){
             getOneCoinTradeLog(coinNames.get(i));

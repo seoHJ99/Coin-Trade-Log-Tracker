@@ -37,7 +37,7 @@ public class BinanceService {
     public void getOneCoinTradeLog(String coinName) throws IOException, ParseException {
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
-        String timestamp = Long.toString(System.currentTimeMillis() + 5000);
+        String timestamp = Long.toString(System.currentTimeMillis() + 000);
         String queryString = "timestamp=" + timestamp + "&symbol="+ coinName +"USDT" ;
         String actualSign = signature.getSignature(queryString);
 
@@ -61,7 +61,7 @@ public class BinanceService {
             }
             System.out.println(coinName);
             for(int i=0; i<stack.size(); i++){
-                stack.pop().get();
+//                stack.pop().get();
             }
         }
 
@@ -77,7 +77,7 @@ public class BinanceService {
 
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
-        String timestamp = Long.toString(System.currentTimeMillis() + 5000);
+        String timestamp = Long.toString(System.currentTimeMillis() + 000);
         String queryString = "timestamp=" + timestamp;
         String actualSign = signature.getSignature(queryString);
 
@@ -99,7 +99,7 @@ public class BinanceService {
     public List<String> getMyCoinName() throws IOException {
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
-        String timestamp = Long.toString(System.currentTimeMillis() + 5000);
+        String timestamp = Long.toString(System.currentTimeMillis() + 000);
         String queryString = "timestamp=" + timestamp;
         String actualSign = signature.getSignature(queryString);
 

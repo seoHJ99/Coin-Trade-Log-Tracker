@@ -32,6 +32,7 @@ public class BinanceService {
     String secretKey = "";
     String accessKey = "";
     String serverUrl = "https://api.binance.com";
+    int plusTime = 0;
 
 
     public void getOneCoinTradeLog(String coinName) throws IOException, ParseException {
@@ -52,6 +53,15 @@ public class BinanceService {
         HttpEntity entity = response.getEntity();;
 
         String entityString = EntityUtils.toString(entity, "UTF-8");
+
+        if(entityString.contains("-1021")){
+            plusTime -= 1000;
+            getOneCoinTradeLog(coinName);
+
+        } else if(entityString.contains("-1131")){
+            plusTime += 1000;
+            getOneCoinTradeLog(coinName);
+        }
 
         if(!entityString.contains("code")){
             JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
@@ -77,7 +87,7 @@ public class BinanceService {
 
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
-        String timestamp = Long.toString(System.currentTimeMillis() + 000);
+        String timestamp = Long.toString(System.currentTimeMillis() + plusTime);
         String queryString = "timestamp=" + timestamp;
         String actualSign = signature.getSignature(queryString);
 
@@ -89,9 +99,16 @@ public class BinanceService {
 
         HttpResponse response = httpClient.execute(request);
         HttpEntity entity = response.getEntity();;
-
         String entityString = EntityUtils.toString(entity, "UTF-8");
-        System.out.println("entityString = " + entityString);
+
+        if(entityString.contains("-1021")){
+            plusTime -= 1000;
+            return getAccountCoin();
+
+        } else if(entityString.contains("-1131")){
+            plusTime += 1000;
+            return getAccountCoin();
+        }
         List<List<String>> result = publicMethod.jsonToList(entityString);
         return result;
     }
@@ -99,7 +116,7 @@ public class BinanceService {
     public List<String> getMyCoinName() throws IOException {
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
-        String timestamp = Long.toString(System.currentTimeMillis() + 000);
+        String timestamp = Long.toString(System.currentTimeMillis() + plusTime);
         String queryString = "timestamp=" + timestamp;
         String actualSign = signature.getSignature(queryString);
 
@@ -113,6 +130,16 @@ public class BinanceService {
         HttpEntity entity = response.getEntity();;
 
         String entityString = EntityUtils.toString(entity, "UTF-8");
+
+        if(entityString.contains("-1021")){
+            plusTime -= 1000;
+            return getMyCoinName();
+
+        } else if(entityString.contains("-1131")){
+            plusTime += 1000;
+            return getMyCoinName();
+        }
+
         List<List<String>> result = publicMethod.jsonToList(entityString);
         List<String> coinNames = new ArrayList<>();
         for(int i=0; i<result.size(); i++){

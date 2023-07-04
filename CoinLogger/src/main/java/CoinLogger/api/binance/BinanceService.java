@@ -28,6 +28,7 @@ public class BinanceService {
     private final HttpClient httpClient;
     private final JSONParser jsonParser;
     private final PublicMethod publicMethod;
+    private final MemberCoinListRepository memberCoinListRepository;
     private static double oneDollarWon;
     String secretKey = "";
     String accessKey = "";
@@ -65,23 +66,16 @@ public class BinanceService {
 
         if(!entityString.contains("code")){
             JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
-            Stack<JSONObject> stack = new Stack<>();
-            for(int i=0; i<jsonArray.size(); i++){
-                stack.push((JSONObject) jsonArray.get(i));
-            }
-            System.out.println(coinName);
-            for(int i=0; i<stack.size(); i++){
-//                stack.pop().get();
-            }
+//          id는 나중에 회원가입 구현한 다음 다시 코드 짜기.
+            String id = "aa";
+            MemberCoin memberCoin = memberCoinListRepository.findByCoinName(coinName, id);
+            JSONObject jsonObject = ((JSONObject) jsonArray.get(jsonArray.size()-1));
+            double newAvgPrice = (memberCoin.getAvgBuyPrice() + Double.parseDouble(jsonObject.get("price").toString()));
+            newAvgPrice = newAvgPrice /(memberCoin.getAmount() + Double.parseDouble(jsonObject.get("executedQty").toString()));
         }
 
-
-//        List<List<String>> result = publicMethod.jsonToList(entityString);
-//        Stack<List<String>> test = new Stack<>();
-//        for(int i =0; i<result.size(); i++){
-//            test.push(result.get(i));
-//        }
     }
+
 
     public List<List<String>> getAccountCoin() throws IOException, ParseException {
 

@@ -7,8 +7,11 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Table()
-public class MemberCoinList {
+public class MemberCoin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String userId;
+    private String ownerId;
+    private String coinName;
+    private double avgBuyPrice;
+    private double amount;
 }

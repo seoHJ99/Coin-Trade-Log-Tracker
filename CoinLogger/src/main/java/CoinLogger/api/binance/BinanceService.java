@@ -19,6 +19,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -30,8 +31,8 @@ public class BinanceService {
     private final PublicMethod publicMethod;
     private final MemberCoinListRepository memberCoinListRepository;
     private static double oneDollarWon;
-    String secretKey = "";
-    String accessKey = "";
+    String secretKey = "o3qjLnuwzNFkh2RQRr8wRCpR8pYqMC1Dt7fF1B9T6xggn73ksNAQSmBUTeeRzpUL";
+    String accessKey = "lTJrdh5xuwUhaeUiYHNP3pMYP7MEPKoDM3h9L4Ka6jy7VZiBlKXPbHKNDh7UuFME";
     String serverUrl = "https://api.binance.com";
     int plusTime = 0;
 
@@ -66,14 +67,17 @@ public class BinanceService {
 
         if(!entityString.contains("code")){
             JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
+            for(Object a : jsonArray){
+                System.out.println(a.toString());
+            }
 //          id는 나중에 회원가입 구현한 다음 다시 코드 짜기.
-            String id = "aa";
+            String id = "test1111";
             MemberCoin memberCoin = memberCoinListRepository.findByCoinName(coinName, id);
             JSONObject jsonObject = ((JSONObject) jsonArray.get(jsonArray.size()-1));
             double newAvgPrice = (memberCoin.getAvgBuyPrice() + Double.parseDouble(jsonObject.get("price").toString()));
             newAvgPrice = newAvgPrice /(memberCoin.getAmount() + Double.parseDouble(jsonObject.get("executedQty").toString()));
+            System.out.println(coinName + ":" + newAvgPrice);
         }
-
     }
 
 

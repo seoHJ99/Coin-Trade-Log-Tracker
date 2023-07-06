@@ -31,8 +31,8 @@ public class BinanceService {
     private final PublicMethod publicMethod;
     private final MemberCoinListRepository memberCoinListRepository;
     private static double oneDollarWon;
-    String secretKey = "o3qjLnuwzNFkh2RQRr8wRCpR8pYqMC1Dt7fF1B9T6xggn73ksNAQSmBUTeeRzpUL";
-    String accessKey = "lTJrdh5xuwUhaeUiYHNP3pMYP7MEPKoDM3h9L4Ka6jy7VZiBlKXPbHKNDh7UuFME";
+    String secretKey = "";
+    String accessKey = "";
     String serverUrl = "https://api.binance.com";
     int plusTime = 0;
 
@@ -50,7 +50,6 @@ public class BinanceService {
         request.addHeader("Content-Type", "application/json");
         request.addHeader("X-MBX-APIKEY", accessKey);
 
-
         HttpResponse response = httpClient.execute(request);
         HttpEntity entity = response.getEntity();;
 
@@ -65,18 +64,38 @@ public class BinanceService {
             getOneCoinTradeLog(coinName);
         }
 
-        if(!entityString.contains("code")){
+        if(!entityString.contains("code") && !(entityString).equals("[]")){
             JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
-            for(Object a : jsonArray){
-                System.out.println(a.toString());
-            }
+
 //          id는 나중에 회원가입 구현한 다음 다시 코드 짜기.
             String id = "test1111";
-            MemberCoin memberCoin = memberCoinListRepository.findByCoinName(coinName, id);
-            JSONObject jsonObject = ((JSONObject) jsonArray.get(jsonArray.size()-1));
-            double newAvgPrice = (memberCoin.getAvgBuyPrice() + Double.parseDouble(jsonObject.get("price").toString()));
-            newAvgPrice = newAvgPrice /(memberCoin.getAmount() + Double.parseDouble(jsonObject.get("executedQty").toString()));
-            System.out.println(coinName + ":" + newAvgPrice);
+            System.out.println(coinName);
+            MemberCoin dbCoin = memberCoinListRepository.findByCoinName(coinName, id);
+
+            if(dbCoin != null){
+                System.out.println(dbCoin.getCoin_name());
+                JSONObject jsonObject = ((JSONObject) jsonArray.get(jsonArray.size()-1));
+                double newAvgPrice = 0;
+                double amount =0;
+                double executedQty = Double.parseDouble(jsonObject.get("executedQty").toString());
+                double price = Double.parseDouble( jsonObject.get("price").toString());
+                if(jsonObject.get("side").equals("BUY")){
+                    newAvgPrice = (dbCoin.getAvg_buy_price() * dbCoin.getAmount() +
+                           price * executedQty);
+                    amount = dbCoin.getAmount() + executedQty;
+                    newAvgPrice = newAvgPrice /amount;
+                }else if(jsonObject.get("side").equals("SELL")){
+                    newAvgPrice = dbCoin.getAvg_buy_price();
+                    amount = dbCoin.getAmount() - executedQty;
+                }
+                MemberCoin updatedCoin = MemberCoin.builder()
+                        .coin_name(coinName)
+                        .idx(dbCoin.getIdx())
+                        .amount(amount)
+                        .avg_buy_price(newAvgPrice)
+                        .build();
+                memberCoinListRepository.save(updatedCoin);
+            }
         }
     }
 
@@ -143,7 +162,6 @@ public class BinanceService {
         for(int i=0; i<result.size(); i++){
              coinNames.add(result.get(i).get(0));
         }
-
         return coinNames;
     }
 

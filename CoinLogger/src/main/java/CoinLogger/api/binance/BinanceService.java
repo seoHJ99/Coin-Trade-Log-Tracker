@@ -73,46 +73,59 @@ public class BinanceService {
 //
             MemberCoin dbCoin = memberCoinListRepository.findByCoinName(coinName, id);
             JSONObject jsonObject = ((JSONObject) jsonArray.get(jsonArray.size() - 1));
-            if(dbCoin != null) {
-                System.out.println("jsonObject = " + jsonObject.toString());
-                double newAvgPrice = 0;
-                double amount = 0;
-                double executedQty = Double.parseDouble(jsonObject.get("executedQty").toString());
-                double price = Double.parseDouble(jsonObject.get("price").toString());
-                long time = Long.parseLong(jsonObject.get("time").toString());
-                if (time > dbCoin.getMill_time()) {
-                    if (jsonObject.get("side").equals("BUY")) {
-                        newAvgPrice = (dbCoin.getAvg_buy_price() * dbCoin.getAmount() +
-                                price * executedQty);
-                        amount = dbCoin.getAmount() + executedQty;
-                        newAvgPrice = newAvgPrice / amount;
-                    } else if (jsonObject.get("side").equals("SELL")) {
-                        newAvgPrice = dbCoin.getAvg_buy_price();
-                        amount = dbCoin.getAmount() - executedQty;
+            if( Long.parseLong(jsonObject.get("time").toString()) > dbCoin.getMill_time()){
+                int breakPoint = 0;
+                for(int i =0; i < jsonArray.size(); i++){
+                    jsonObject = (JSONObject) jsonArray.get(i);
+                    breakPoint ++;
+                    if( Long.parseLong(jsonObject.get("time").toString()) > dbCoin.getMill_time()){
+                        break;
                     }
-                    MemberCoin updatedCoin = MemberCoin.builder()
-                            .coin_name(coinName)
-                            .idx(dbCoin.getIdx())
-                            .owner_id(dbCoin.getOwner_id())
-                            .amount(amount)
-                            .avg_buy_price(newAvgPrice)
-                            .mill_time(time)
-                            .build();
-                    memberCoinListRepository.save(updatedCoin);
                 }
-            }else if (jsonObject.get("side").equals("BUY")){
-                String name = coinName;
-                double executedQty = Double.parseDouble(jsonObject.get("executedQty").toString());
-                double price = Double.parseDouble(jsonObject.get("price").toString());
-                long time = Long.parseLong(jsonObject.get("time").toString());
-                MemberCoin updatedCoin = MemberCoin.builder()
-                        .coin_name(coinName)
-                        .owner_id(id)
-                        .amount(executedQty)
-                        .avg_buy_price(price)
-                        .mill_time(time)
-                        .build();
-                memberCoinListRepository.save(updatedCoin);
+                for(int i = breakPoint; i < jsonArray.size() - breakPoint; i++){
+                    jsonObject = (JSONObject) jsonArray.get(i);
+                    if(dbCoin != null) {
+                        System.out.println("jsonObject = " + jsonObject.toString());
+                        double newAvgPrice = 0;
+                        double amount = 0;
+                        double executedQty = Double.parseDouble(jsonObject.get("executedQty").toString());
+                        double price = Double.parseDouble(jsonObject.get("price").toString());
+                        long time = Long.parseLong(jsonObject.get("time").toString());
+                        if (time > dbCoin.getMill_time()) {
+                            if (jsonObject.get("side").equals("BUY")) {
+                                newAvgPrice = (dbCoin.getAvg_buy_price() * dbCoin.getAmount() +
+                                        price * executedQty);
+                                amount = dbCoin.getAmount() + executedQty;
+                                newAvgPrice = newAvgPrice / amount;
+                            } else if (jsonObject.get("side").equals("SELL")) {
+                                newAvgPrice = dbCoin.getAvg_buy_price();
+                                amount = dbCoin.getAmount() - executedQty;
+                            }
+                            MemberCoin updatedCoin = MemberCoin.builder()
+                                    .coin_name(coinName)
+                                    .idx(dbCoin.getIdx())
+                                    .owner_id(dbCoin.getOwner_id())
+                                    .amount(amount)
+                                    .avg_buy_price(newAvgPrice)
+                                    .mill_time(time)
+                                    .build();
+                            memberCoinListRepository.save(updatedCoin);
+                        }
+                    }else if (jsonObject.get("side").equals("BUY")){
+                        String name = coinName;
+                        double executedQty = Double.parseDouble(jsonObject.get("executedQty").toString());
+                        double price = Double.parseDouble(jsonObject.get("price").toString());
+                        long time = Long.parseLong(jsonObject.get("time").toString());
+                        MemberCoin updatedCoin = MemberCoin.builder()
+                                .coin_name(coinName)
+                                .owner_id(id)
+                                .amount(executedQty)
+                                .avg_buy_price(price)
+                                .mill_time(time)
+                                .build();
+                        memberCoinListRepository.save(updatedCoin);
+                    }
+                }
             }
         }
     }

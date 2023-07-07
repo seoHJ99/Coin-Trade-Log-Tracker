@@ -1,5 +1,6 @@
 package CoinLogger.api.binance;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import javax.persistence.*;
 @Table(name = "member_coin_list")
 @RequiredArgsConstructor
 @Builder
+@AllArgsConstructor
 public class MemberCoin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,4 +22,5 @@ public class MemberCoin {
     private String coin_name;
     private double avg_buy_price;
     private double amount;
+    private long mill_time;
 }

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>내정보</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        min-width: 1000px;
+      }
+      .contain_all {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 250px;
+      }
+      .header {
+        width: 100%;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+      .logout_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+      .main {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        padding: 10px;
+      }
+      .table {
+        width: 500px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+      }
+      .bold {
+        border: 1px solid black;
+        padding: 10px;
+        margin: 0px;
+        font-weight: bold;
+      }
+      .one_row {
+        display: flex;
+        justify-content: flex-start;
+      }
+      .bold:nth-child(1) {
+        width: 53.7px;
+      }
+      .bold:nth-child(2) {
+        width: 191px;
+      }
+      .bold:nth-child(3) {
+        width: 191px;
+      }
+      .content {
+        border: 1px solid black;
+        padding: 10px;
+        flex-grow: 1;
+      }
+      .coin_name {
+        width: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="contain_all">
+      <div class="header">
+        <div><h1>코인 현황판</h1></div>
+        <div class="logout_btn">
+          <a href="#">로그아웃</a>
+          <a href="#" class="">내 정보</a>
+        </div>
+      </div>
+      <div class="main">
+        <div class="table">
+          <div class="one_row">
+            <span class="bold">이름</span>
+            <span class="bold">구매 가격</span>
+            <span class="bold">보유 개수</span>
+          </div>
+          <div class="one_row">
+            <span class="content coin_name">xrp</span>
+            <span class="content">
+              <input class="buy_price" type="text" />
+            </span>
+            <span class="content">
+              <input class="amount" type="text" />
+            </span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <input type="button" class="save" value="저장" />
+      </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+    <script>
+      $(".coin_check_box").change(function () {
+        readonlyCon();
+      });
+
+      function readonlyCon() {
+        const inputList = $(".keys");
+        inputList.each(function () {
+          let status = $(this).prop("readonly");
+          console.log(status);
+          $(this).prop("readonly", !status);
+          if (status == true) {
+            $(this).css("background", "white");
+          } else {
+            $(this).css("background", "#e1e0e0");
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

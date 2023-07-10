@@ -16,10 +16,10 @@ import javax.persistence.*;
 public class MemberCoin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idx")
     private int idx;
     private String owner_id;
-    private String coin_name;
+    @Column(name = "coin_name")
+    private String coinName;
     private double avg_buy_price;
     private double amount;
     private long mill_time;

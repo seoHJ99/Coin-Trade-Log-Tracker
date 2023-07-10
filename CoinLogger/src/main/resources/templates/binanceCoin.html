@@ -16,6 +16,7 @@
         flex-direction: column;
         align-items: center;
         margin: 0 250px;
+        padding-bottom: 50px;
       }
       .header {
         width: 100%;
@@ -35,6 +36,8 @@
         justify-content: center;
         width: 100%;
         padding: 10px;
+        flex-direction: column;
+        align-items: center;
       }
       .table {
         width: 500px;
@@ -81,14 +84,22 @@
         </div>
       </div>
       <div class="main">
+        <div>
+          <p>
+            바이낸스 지갑에 코인이 존재한다면 구매 가격과 개수를 입력해 주세요.
+            <br />
+            이후 처음 구매하는 코인은 기입하지 않아도 됩니다. <br />
+            기입하지 않을 경우 코인 내역에 오차가 발생합니다.
+          </p>
+        </div>
         <div class="table">
           <div class="one_row">
             <span class="bold">이름</span>
             <span class="bold">구매 가격</span>
             <span class="bold">보유 개수</span>
           </div>
-          <div class="one_row">
-            <span class="content coin_name">xrp</span>
+          <div class="one_row" th:each="coin: ${coinName}">
+            <span class="content coin_name" th:text="${coin}">xrp</span>
             <span class="content">
               <input class="buy_price" type="text" />
             </span>
@@ -99,27 +110,41 @@
         </div>
       </div>
       <div>
-        <input type="button" class="save" value="저장" />
+        <input
+          type="button"
+          class="save"
+          value="저장"
+          onclick="saveBinanceWallet()"
+        />
       </div>
     </div>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 
     <script>
-      $(".coin_check_box").change(function () {
-        readonlyCon();
-      });
-
-      function readonlyCon() {
-        const inputList = $(".keys");
-        inputList.each(function () {
-          let status = $(this).prop("readonly");
-          console.log(status);
-          $(this).prop("readonly", !status);
-          if (status == true) {
-            $(this).css("background", "white");
-          } else {
-            $(this).css("background", "#e1e0e0");
-          }
+      let id = "0";
+      function saveBinanceWallet() {
+        let data = new Map();
+        for (let i = 0; i < $(".one_row").length; i++) {
+          let value = [];
+          value.push($(".buy_price").eq(i).val());
+          value.push($(".amount").eq(i).val());
+          data.set($(".coin_name").eq(i).text(), value);
+        }
+        $.ajax({
+          type: "POST",
+          async: false,
+          traditional: true,
+          url: "/binance/wallet",
+          data: JSON.stringify(data),
+          error: function (e) {
+            alert("오류 발생");
+          },
+          success: function (response) {
+            if (response == 1) {
+              console.log("aaaaaaa");
+              location.href = "/binance/" + id + "/account";
+            }
+          },
         });
       }
     </script>

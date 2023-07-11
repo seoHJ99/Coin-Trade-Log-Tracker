@@ -1,6 +1,7 @@
 package CoinLogger.api.binance;
 
 import CoinLogger.PublicMethod;
+import javassist.bytecode.analysis.Type;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -47,7 +48,6 @@ public class BinanceService {
 
         HttpResponse response = httpClient.execute(request);
         HttpEntity entity = response.getEntity();
-        ;
 
         String entityString = EntityUtils.toString(entity, "UTF-8");
         if (entityString.contains("-1021")) {
@@ -273,16 +273,38 @@ public class BinanceService {
         return dtoList;
     }
 
-    public void saveWalletInfo(Map<String, String[]> info){
+    public void saveWalletInfo(Map<String, List<String>> info){
         MemberCoin memberCoin = new MemberCoin();
         Iterator<String> coins = info.keySet().iterator();
+        List<String> zeroList = new ArrayList<>();
+        zeroList.add("0");
+        zeroList.add("0");
+        String id = "test2222";
         while (coins.hasNext()){
             String coinName = coins.next();
-            memberCoin = MemberCoin.builder()
-                    .coinName(coinName)
-                    .avg_buy_price(Double.parseDouble(info.get(coinName)[0]))
-                    .amount(Double.parseDouble(info.get(coinName)[1]))
-                    .build();
+            if(info.get(coinName).toString().equals("[, ]")){
+                info.put(coinName, zeroList);
+            }
+            memberCoin = memberCoinListRepository.findByCoinName(coinName);
+            System.out.println(coinName);
+            if(memberCoin == null){
+                memberCoin = MemberCoin.builder()
+                        .coinName(coinName)
+                        .owner_id(id)
+                        .avg_buy_price(Double.parseDouble(info.get(coinName).get(0)))
+                        .amount(Double.parseDouble(info.get(coinName).get(1)))
+                        .build();
+                memberCoinListRepository.save(memberCoin);
+            }else {
+                memberCoin = MemberCoin.builder()
+                        .idx(memberCoin.getIdx())
+                        .coinName(coinName)
+                        .owner_id(id)
+                        .avg_buy_price(Double.parseDouble(info.get(coinName).get(0)))
+                        .amount(Double.parseDouble(info.get(coinName).get(1)))
+                        .build();
+                memberCoinListRepository.save(memberCoin);
+            }
         }
     }
 }

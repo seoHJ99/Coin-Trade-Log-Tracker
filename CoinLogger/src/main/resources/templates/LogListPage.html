@@ -187,11 +187,7 @@
                 <td th:text="${ log.orderTime }">더미</td>
                 <td class="sort" th:text="${ log.orderSort }">더미</td>
                 <td th:text="${ log.coinName }">더미</td>
-                <td
-                  th:text="${ #numbers.formatInteger( log.thatTimePrice, 3, 'COMMA') + '원' }"
-                >
-                  더미
-                </td>
+                <td th:text="${log.thatTimePrice + '원' }">더미</td>
                 <td th:text="${ log.orderAmount }">더미</td>
                 <td th:text="${ log.signedAmount }">더미</td>
                 <!-- <td th:text="${ log.remainAmount }">더미</td> -->

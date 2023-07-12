@@ -1,8 +1,10 @@
 package CoinLogger.api.binance;
 
+import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
 import javassist.bytecode.analysis.Type;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -26,7 +28,7 @@ public class BinanceService {
     private final JSONParser jsonParser;
     private final PublicMethod publicMethod;
     private final MemberCoinListRepository memberCoinListRepository;
-    private static double oneDollarWon;
+    private double oneDollarWon;
     String secretKey = "";
     String accessKey = "";
     String serverUrl = "https://api.binance.com";
@@ -61,7 +63,7 @@ public class BinanceService {
         return entityString;
     }
 
-    public MemberCoin makeCoinEntityAndSave(String entityString) throws ParseException {
+    public void makeCoinEntityAndSave(String entityString) throws ParseException {
         MemberCoin newData = null;
         if (!entityString.contains("code") && !(entityString).equals("[]")) {
             JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
@@ -136,7 +138,6 @@ public class BinanceService {
                 memberCoinListRepository.save(newData);
             }
         }
-        return newData;
     }
 
 
@@ -206,15 +207,31 @@ public class BinanceService {
         return coinNames;
     }
 
-    public List<MemberCoin> getAllCoinLog() throws IOException, ParseException {
+    public List<LogDto_Binance> getAllCoinLog() throws IOException, ParseException {
         List<String> coinNames = getMyCoinName();
-        List<MemberCoin> entityList = new ArrayList<>();
+        getDollar();
+        List<LogDto_Binance> logList = new ArrayList<>();
         for (int i = 0; i < coinNames.size(); i++) {
             String entityString = getOneCoinTradeLog(coinNames.get(i));
-            MemberCoin memberCoin = makeCoinEntityAndSave(entityString);
-            entityList.add(memberCoin);
+            makeCoinEntityAndSave(entityString);
+            if(!entityString.contains("code")){
+                JSONParser jsonParser = new JSONParser();
+                JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
+                List<LogDto_Binance> oneList = makeOneCoinLogList(jsonArray);
+                logList.addAll(oneList);
+            }
         }
-        return entityList;
+        Collections.sort(logList, new LogTimeComparator());
+        return logList;
+    }
+
+    public List<LogDto_Binance> makeOneCoinLogList(JSONArray jsonArray){
+        List<LogDto_Binance> logList = new ArrayList<>();
+        for(int i =0; i<jsonArray.size(); i++){
+            LogDto_Binance logDto = new LogDto_Binance((JSONObject) jsonArray.get(i), oneDollarWon);
+            logList.add(logDto);
+        }
+        return logList;
     }
 
 
@@ -234,8 +251,7 @@ public class BinanceService {
         return result;
     }
 
-    public List<AccountDto_Binance> makeAccountDto() throws IOException, ParseException {
-        List<List<String>> myCoin = getAccountCoin();
+    public void getDollar () throws IOException, ParseException {
         if (oneDollarWon == 0) {
             HttpGet request = new HttpGet("https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD");
             request.addHeader("Content-Type", "application/json");
@@ -247,6 +263,11 @@ public class BinanceService {
             JSONObject a = (JSONObject) jsonObject.get(0);
             oneDollarWon = (double) a.get("basePrice");
         }
+    }
+
+    public List<AccountDto_Binance> makeAccountDto() throws IOException, ParseException {
+        List<List<String>> myCoin = getAccountCoin();
+        getDollar();
         double sumNowPriceWon;
         List<AccountDto_Binance> dtoList = new ArrayList<>();
         for (int i = 0; i < myCoin.size(); i++) {
@@ -270,11 +291,12 @@ public class BinanceService {
             }
             dtoList.add(dto);
         }
+        Collections.sort( dtoList, new CoinSumBuyPriceComparator());
         return dtoList;
     }
 
     public void saveWalletInfo(Map<String, List<String>> info){
-        MemberCoin memberCoin = new MemberCoin();
+        MemberCoin memberCoin;
         Iterator<String> coins = info.keySet().iterator();
         List<String> zeroList = new ArrayList<>();
         zeroList.add("0");
@@ -301,6 +323,7 @@ public class BinanceService {
                         .coinName(coinName)
                         .owner_id(id)
                         .avg_buy_price(Double.parseDouble(info.get(coinName).get(0)))
+                        .mill_time(System.currentTimeMillis())
                         .amount(Double.parseDouble(info.get(coinName).get(1)))
                         .build();
                 memberCoinListRepository.save(memberCoin);

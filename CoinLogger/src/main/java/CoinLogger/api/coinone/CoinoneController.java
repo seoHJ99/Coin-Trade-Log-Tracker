@@ -1,15 +1,12 @@
 package CoinLogger.api.coinone;
 
-import CoinLogger.api.upbit.AccountDto_Upbit;
+import CoinLogger.api.upbit.AccountDto;
 import lombok.*;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 @Controller
@@ -20,13 +17,13 @@ public class CoinoneController {
 
     @GetMapping("/coinone/{id}/accounts")
     public String getAccount(Model model) throws ParseException {
-        List<AccountDto_Coinone> dtoList =  coinoneService.accountDtoMaker();
+        List<AccountDto> dtoList =  coinoneService.accountDtoMaker();
         Map<String, String> secondData = new HashMap<>();
         int totalBuyPrice = 0;
         int totalNowPrice = 0;
         int totalEarning = 0;
 
-        for(AccountDto_Coinone dto : dtoList){
+        for(AccountDto dto : dtoList){
             totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
             totalEarning += dto.getEarning();
             totalNowPrice += dto.getSumNowPrice();

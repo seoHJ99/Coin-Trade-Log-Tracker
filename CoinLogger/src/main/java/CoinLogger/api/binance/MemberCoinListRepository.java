@@ -11,5 +11,5 @@ public interface MemberCoinListRepository extends JpaRepository<MemberCoin, Stri
     @Query(value = "select * from member_coin_list where coin_name = :coinName and owner_id = :userId", nativeQuery = true)
     MemberCoin findByCoinNameAndId(@Param(value = "coinName") String coinName, @Param(value = "userId") String userId);
 
-    MemberCoin findByCoinName(String coinName);
+//    MemberCoin findByCoinName(String coinName);
 }

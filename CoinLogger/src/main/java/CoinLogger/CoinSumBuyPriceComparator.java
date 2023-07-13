@@ -1,7 +1,6 @@
 package CoinLogger;
 
-import CoinLogger.api.AccountDto;
-import CoinLogger.api.coinone.AccountDto_Coinone;
+import CoinLogger.api.upbit.AccountDto;
 
 import java.util.Comparator;
 

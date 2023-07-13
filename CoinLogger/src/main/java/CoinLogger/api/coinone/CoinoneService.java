@@ -4,6 +4,7 @@ import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
 import CoinLogger.api.LogDto;
 import CoinLogger.api.OrderTimeComparator;
+import CoinLogger.api.upbit.AccountDto;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
@@ -263,12 +264,12 @@ public class CoinoneService {
         }
     }
 
-    public List<AccountDto_Coinone> accountDtoMaker() throws ParseException {
-        List<AccountDto_Coinone> result = new ArrayList<>();
+    public List<AccountDto> accountDtoMaker() throws ParseException {
+        List<AccountDto> result = new ArrayList<>();
         List<List<String>> accounts = getAccounts();
         Map<String, String> coinMap = getMyCoinPrice();
         for (int i = 0; i < accounts.size(); i++) {
-            AccountDto_Coinone oneData = null;
+            AccountDto oneData = null;
             String coin = accounts.get(i).get(3);
             double amount = Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1));
             double buyPrice = Double.parseDouble(accounts.get(i).get(2));
@@ -284,7 +285,7 @@ public class CoinoneService {
             }
 
             if (price == 0) {
-                oneData = AccountDto_Coinone.builder()
+                oneData = AccountDto.builder()
                         .coinName(coin)
                         .ownAmount(amount)
                         .bigAmount(BigDecimal.valueOf(amount).toPlainString())
@@ -295,7 +296,7 @@ public class CoinoneService {
                         .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
                         .build();
             } else {
-                oneData = AccountDto_Coinone.builder()
+                oneData = AccountDto.builder()
                         .coinName(coin)
                         .ownAmount(amount)
                         .bigAmount(BigDecimal.valueOf(amount).toPlainString())

@@ -1,14 +1,12 @@
 package CoinLogger.api.upbit;
 
-import CoinLogger.api.AccountDto;
 import lombok.*;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @Builder
-@NoArgsConstructor
-public class AccountDto_Upbit implements AccountDto {
+@AllArgsConstructor
+public class AccountDto{
     private String coinName;
     private double ownAmount;
     private String bigAmount;

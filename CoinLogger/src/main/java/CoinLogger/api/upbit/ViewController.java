@@ -1,10 +1,6 @@
 package CoinLogger.api.upbit;
 
 
-import CoinLogger.api.coinone.AccountDto_Coinone;
-import CoinLogger.api.upbit.AccountDto_Upbit;
-import CoinLogger.api.upbit.LogDto_Upbit;
-import CoinLogger.api.upbit.UpbitService;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Controller;
@@ -15,7 +11,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,22 +20,8 @@ public class ViewController {
     private final UpbitService upbit;
     @GetMapping("/upbit/{id}/accounts")
     public String getAllAccounts(Model model) throws IOException, ParseException {
-        List<AccountDto_Upbit> dtoList = upbit.accountDtoMaker();
-        Map<String, String> secondData = new HashMap<>();
-        int totalBuyPrice = 0;
-        int totalNowPrice = 0;
-        int totalEarning = 0;
-        double avgRate = 0;
-        for(AccountDto_Upbit dto : dtoList){
-            totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
-            totalEarning += dto.getEarning();
-            totalNowPrice += dto.getSumNowPrice();
-        }
-        avgRate = (int)((double)totalEarning/totalBuyPrice * 10000d)/100d;
-        secondData.put("totalBuyPrice", totalBuyPrice + "");
-        secondData.put("totalNowPrice", totalNowPrice + "");
-        secondData.put("totalEarning", totalEarning + "");
-        secondData.put("avgRate", avgRate + "");
+        List<AccountDto> dtoList = upbit.accountDtoMaker();
+        Map<String, String> secondData = upbit.makeSumData(dtoList);
 
         model.addAttribute( "data", dtoList);
         model.addAttribute("secondData", secondData);

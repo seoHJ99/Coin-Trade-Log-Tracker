@@ -5,15 +5,12 @@ import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
 import CoinLogger.api.ApiService;
 import CoinLogger.api.HttpSender;
-import CoinLogger.api.coinone.AccountDto_Coinone;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -150,23 +147,41 @@ public class UpbitService implements ApiService {
         return publicMethod.jsonToList(result);
     }
 
+    public Map<String, String> makeSumData(List<AccountDto> dtoList){
+        Map<String, String> secondData = new HashMap<>();
+        int totalBuyPrice = 0;
+        int totalNowPrice = 0;
+        int totalEarning = 0;
+        double avgRate = 0;
+        for(AccountDto dto : dtoList){
+            totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
+            totalEarning += dto.getEarning();
+            totalNowPrice += dto.getSumNowPrice();
+        }
+        avgRate = (int)((double)totalEarning/totalBuyPrice * 10000d)/100d;
+        secondData.put("totalBuyPrice", totalBuyPrice + "");
+        secondData.put("totalNowPrice", totalNowPrice + "");
+        secondData.put("totalEarning", totalEarning + "");
+        secondData.put("avgRate", avgRate + "");
+        return secondData;
+    }
 
-
-    public List< AccountDto_Upbit > accountDtoMaker() throws IOException, ParseException {
-        List<AccountDto_Upbit> result = new ArrayList<>();
+    public List<AccountDto> accountDtoMaker() throws IOException, ParseException {
+        List<AccountDto> result = new ArrayList<>();
         List<List<String>> accounts = getAccounts();
         List<String> myCoinPrice = getMyCoinPrice();
         for (int i = 0; i < accounts.size(); i++) {
-            AccountDto_Upbit oneData = null;
-            String coin = accounts.get(i).get(3);
-            double amount = Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1));
+            AccountDto oneData = null;
+            System.out.println(accounts.get(i).toString());
+            String coin = accounts.get(i).get(0);
+            double amount = Double.parseDouble(accounts.get(i).get(1)) + Double.parseDouble(accounts.get(i).get(2));
             double buyPrice = Double.parseDouble(accounts.get(i).get(2));
-            double price = Double.valueOf(myCoinPrice.get(i));
+            double price = Double.parseDouble(myCoinPrice.get(i));
             if (amount == 0) {
                 continue;
             }
             if (price == 0) {
-                oneData = AccountDto_Upbit.builder()
+                oneData = AccountDto.builder()
                         .coinName(coin)
                         .ownAmount(amount)
                         .bigAmount(BigDecimal.valueOf(amount).toPlainString())
@@ -176,7 +191,7 @@ public class UpbitService implements ApiService {
                         .nowPrice(0)
                         .build();
             } else {
-                oneData = AccountDto_Upbit.builder()
+                oneData = AccountDto.builder()
                         .coinName(coin)
                         .ownAmount(amount)
                         .bigAmount(BigDecimal.valueOf(amount).toPlainString())

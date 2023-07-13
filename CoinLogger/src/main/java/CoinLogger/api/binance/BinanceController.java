@@ -1,19 +1,13 @@
 package CoinLogger.api.binance;
 
-import CoinLogger.api.coinone.AccountDto_Coinone;
-import lombok.RequiredArgsConstructor;
 
-import org.json.simple.JSONObject;
+import CoinLogger.api.upbit.AccountDto;
+import lombok.RequiredArgsConstructor;
 import org.json.simple.parser.ParseException;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.http.HttpResponse;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,22 +19,8 @@ public class BinanceController {
 
     @GetMapping("/binance/{id}/account")
     public String getAccount(Model model) throws IOException, ParseException {
-        List<AccountDto_Binance> dtoList = binanceService.makeAccountDto();
-        Map<String, String> secondData = new HashMap<>();
-        int totalBuyPrice = 0;
-        int totalNowPrice = 0;
-        int totalEarning = 0;
-
-        for(AccountDto_Binance dto : dtoList){
-            totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
-            totalEarning += dto.getEarning();
-            totalNowPrice += dto.getSumNowPrice();
-        }
-        double avgRate = (int)((double)totalEarning/totalBuyPrice * 10000d)/100d;
-        secondData.put("totalBuyPrice", totalBuyPrice + "");
-        secondData.put("totalNowPrice", totalNowPrice + "");
-        secondData.put("totalEarning", totalEarning + "");
-        secondData.put("avgRate", avgRate + "");
+        List<AccountDto> dtoList = binanceService.accountDtoMaker();
+        Map<String, String> secondData = binanceService.makeSumData(dtoList);
         model.addAttribute("data", dtoList);
         model.addAttribute("secondData", secondData);
         return "AccountsListPage";

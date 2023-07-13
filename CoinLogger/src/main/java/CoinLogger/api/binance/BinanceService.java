@@ -2,6 +2,7 @@ package CoinLogger.api.binance;
 
 import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
+import CoinLogger.api.upbit.AccountDto;
 import javassist.bytecode.analysis.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -265,18 +266,40 @@ public class BinanceService {
         }
     }
 
-    public List<AccountDto_Binance> makeAccountDto() throws IOException, ParseException {
+    public Map<String, String> makeSumData(List<AccountDto> dtoList){
+        Map<String, String> secondData = new HashMap<>();
+        int totalBuyPrice = 0;
+        int totalNowPrice = 0;
+        int totalEarning = 0;
+
+        for(AccountDto dto : dtoList){
+            totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
+            totalEarning += dto.getEarning();
+            totalNowPrice += dto.getSumNowPrice();
+        }
+        double avgRate = (int)((double)totalEarning/totalBuyPrice * 10000d)/100d;
+        secondData.put("totalBuyPrice", totalBuyPrice + "");
+        secondData.put("totalNowPrice", totalNowPrice + "");
+        secondData.put("totalEarning", totalEarning + "");
+        secondData.put("avgRate", avgRate + "");
+        return secondData;
+    }
+
+    public List<AccountDto> accountDtoMaker() throws IOException, ParseException {
         List<List<String>> myCoin = getAccountCoin();
+        // id
+        String id = "test2222";
+        //
         getDollar();
         double sumNowPriceWon;
-        List<AccountDto_Binance> dtoList = new ArrayList<>();
+        List<AccountDto> dtoList = new ArrayList<>();
         for (int i = 0; i < myCoin.size(); i++) {
             String coinName = myCoin.get(i).get(0);
-            MemberCoin entity = memberCoinListRepository.findByCoinName(coinName);
+            MemberCoin entity = memberCoinListRepository.findByCoinNameAndId(coinName, id);
             double coinPrice = getCoinPrice(myCoin.get(i).get(0));
             double coinAmount = Double.parseDouble(myCoin.get(i).get(1));
             sumNowPriceWon = coinPrice * oneDollarWon * coinAmount;
-            AccountDto_Binance dto = AccountDto_Binance.builder()
+            AccountDto dto = AccountDto.builder()
                     .coinName(myCoin.get(i).get(0))
                     .bigAmount(""+BigDecimal.valueOf(coinAmount))
                     .bigNow(BigDecimal.valueOf(coinPrice * oneDollarWon) + "")
@@ -307,7 +330,7 @@ public class BinanceService {
             if(info.get(coinName).toString().equals("[, ]")){
                 info.put(coinName, zeroList);
             }
-            memberCoin = memberCoinListRepository.findByCoinName(coinName);
+            memberCoin = memberCoinListRepository.findByCoinNameAndId(coinName,id);
             System.out.println(coinName);
             if(memberCoin == null){
                 memberCoin = MemberCoin.builder()

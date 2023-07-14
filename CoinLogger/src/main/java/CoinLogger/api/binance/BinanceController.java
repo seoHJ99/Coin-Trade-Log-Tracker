@@ -42,11 +42,7 @@ public class BinanceController {
     @PostMapping("/test")
     @ResponseBody
     public String saveWalletInfo(@RequestBody Map data){
-        // id나중에
-        String id =  "";
-        //
         binanceService.saveWalletInfo(data);
-
         return "1";
     }
 }

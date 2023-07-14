@@ -1,5 +1,7 @@
 package CoinLogger.api;
 
+import CoinLogger.api.upbit.LogDto;
+
 import java.util.Comparator;
 
 public class OrderTimeComparator implements Comparator<LogDto> {

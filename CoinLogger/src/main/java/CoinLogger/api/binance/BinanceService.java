@@ -3,6 +3,7 @@ package CoinLogger.api.binance;
 import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
 import CoinLogger.api.upbit.AccountDto;
+import CoinLogger.api.upbit.LogDto;
 import javassist.bytecode.analysis.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -30,8 +31,8 @@ public class BinanceService {
     private final PublicMethod publicMethod;
     private final MemberCoinListRepository memberCoinListRepository;
     private double oneDollarWon;
-    String secretKey = "";
-    String accessKey = "";
+    String secretKey = "o3qjLnuwzNFkh2RQRr8wRCpR8pYqMC1Dt7fF1B9T6xggn73ksNAQSmBUTeeRzpUL";
+    String accessKey = "lTJrdh5xuwUhaeUiYHNP3pMYP7MEPKoDM3h9L4Ka6jy7VZiBlKXPbHKNDh7UuFME";
     String serverUrl = "https://api.binance.com";
     int plusTime = 0;
 
@@ -69,7 +70,7 @@ public class BinanceService {
         if (!entityString.contains("code") && !(entityString).equals("[]")) {
             JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
 //          id는 나중에 회원가입 구현한 다음 다시 코드 짜기.
-            String id = "test1111";
+            String id = "test2222";
             String coinName = "";
             for(int i =0; i<jsonArray.size(); i++){
                 coinName = ((JSONObject)jsonArray.get(i)).get("symbol").toString().replaceAll("USDT","");
@@ -208,17 +209,17 @@ public class BinanceService {
         return coinNames;
     }
 
-    public List<LogDto_Binance> getAllCoinLog() throws IOException, ParseException {
+    public List<LogDto> getAllCoinLog() throws IOException, ParseException {
         List<String> coinNames = getMyCoinName();
         getDollar();
-        List<LogDto_Binance> logList = new ArrayList<>();
+        List<LogDto> logList = new ArrayList<>();
         for (int i = 0; i < coinNames.size(); i++) {
             String entityString = getOneCoinTradeLog(coinNames.get(i));
             makeCoinEntityAndSave(entityString);
             if(!entityString.contains("code")){
                 JSONParser jsonParser = new JSONParser();
                 JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
-                List<LogDto_Binance> oneList = makeOneCoinLogList(jsonArray);
+                List<LogDto> oneList = makeOneCoinLogList(jsonArray);
                 logList.addAll(oneList);
             }
         }
@@ -226,10 +227,10 @@ public class BinanceService {
         return logList;
     }
 
-    public List<LogDto_Binance> makeOneCoinLogList(JSONArray jsonArray){
-        List<LogDto_Binance> logList = new ArrayList<>();
+    public List<LogDto> makeOneCoinLogList(JSONArray jsonArray){
+        List<LogDto> logList = new ArrayList<>();
         for(int i =0; i<jsonArray.size(); i++){
-            LogDto_Binance logDto = new LogDto_Binance((JSONObject) jsonArray.get(i), oneDollarWon);
+            LogDto logDto = new LogDto((JSONObject) jsonArray.get(i), oneDollarWon);
             logList.add(logDto);
         }
         return logList;
@@ -306,11 +307,20 @@ public class BinanceService {
                     .nowPrice(coinPrice * oneDollarWon)
                     .ownAmount(coinAmount)
                     .sumNowPrice((int) sumNowPriceWon)
+                    .trader("https://i.namu.wiki/i/Bf3cdzU4HpGUuQP0ZKI682ODWFFj6SBsfA-VL05m25ksKHjOHuHI9lKpg0ydpayw0J66lSqsxUd12acGFGNMnPnjjN8PgKBIbBDSumu09Yud2a42cpXV-Op-tZajllmChje-6s5QNucl-korqJEu2A.svg")
                     .build();
             if(entity != null){
                 dto.setBuyPrice(entity.getAvg_buy_price());
                 dto.setBigBuy(BigDecimal.valueOf(entity.getAvg_buy_price()) + "");
                 dto.setSumBuyPrice(dto.getOwnAmount() * dto.getBuyPrice());
+            }
+
+            dto.setEarning((int) ((dto.getNowPrice() * dto.getOwnAmount()) - (dto.getBuyPrice() * dto.getOwnAmount())));
+            double rate = (dto.getNowPrice() / dto.getBuyPrice() * 100d) - 100;
+            if( (Math.round(rate * 100)) / 100d == 9.223372036854776E16){
+                dto.setRateOfReturn(0);
+            }else {
+                dto.setRateOfReturn((Math.round(rate * 100)) / 100d);
             }
             dtoList.add(dto);
         }
@@ -331,7 +341,6 @@ public class BinanceService {
                 info.put(coinName, zeroList);
             }
             memberCoin = memberCoinListRepository.findByCoinNameAndId(coinName,id);
-            System.out.println(coinName);
             if(memberCoin == null){
                 memberCoin = MemberCoin.builder()
                         .coinName(coinName)

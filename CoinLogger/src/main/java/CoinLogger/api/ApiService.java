@@ -7,7 +7,7 @@ import java.util.List;
 
 
 public interface ApiService {
-    HttpClient httpClient = null;
+
 
     List<List<String>> getAccounts () throws IOException;
 

@@ -90,12 +90,24 @@
         padding: 5px;
         text-align: center;
       }
-      .list {
-        max-height: 800px;
-        overflow: auto;
-      }
+
       .trader {
         width: 50px;
+      }
+      thead {
+        width: 950px;
+      }
+      .firstTableBody {
+        display: block;
+        height: 500px;
+        overflow: auto;
+      }
+      .seperate {
+        border-collapse: collapse;
+        border: 1px solid #888;
+      }
+      .seperate thead {
+        display: block;
       }
     </style>
   </head>
@@ -133,43 +145,38 @@
       <div class="main">
         <div class="list">
           <table border="1" class="seperate">
-            <colgroup>
-              <col width="12.5%" />
-              <col width="12.5%" />
-              <col width="12.5%" />
-              <col width="12.5%" />
-              <col width="12.5%" />
-              <col width="12.5%" />
-              <col width="12.5%" />
-              <col width="12.5%" />
-            </colgroup>
-            <th>코인 이름</th>
-            <th>보유 개수</th>
-            <th>현재 가격</th>
-            <th>매수 평균가</th>
-            <th>매수 금액</th>
-            <th>평가 금액</th>
-            <th>수익 금액</th>
-            <th>수익률</th>
-            <th>거래소</th>
-            <tr th:each="data : ${data}">
-              <td th:text="${ data.coinName }">더미</td>
-              <td th:text="${data.bigAmount}">더미</td>
-              <td th:text="${ data.bigNow }">더미</td>
-              <td th:text="${ data.bigBuy }">더미</td>
-              <td th:text="${ #numbers.formatCurrency( data.sumBuyPrice ) }">
-                더미
-              </td>
-              <td th:text="${ #numbers.formatCurrency( data.sumNowPrice) }">
-                더미
-              </td>
-              <td th:text="${ data.earning }">더미</td>
-              <td class="rate" th:text="${ data.rateOfReturn + '%' }">더미</td>
-              <td><img class="trader" th:src="${data.trader}" alt="" /></td>
-            </tr>
+            <thead>
+              <th class="firstTh">코인 <br />이름</th>
+              <th class="firstTh">보유 개수</th>
+              <th class="firstTh">현재 가격</th>
+              <th class="firstTh">매수 평균가</th>
+              <th class="firstTh">매수 금액</th>
+              <th class="firstTh">평가 금액</th>
+              <th class="firstTh">수익 금액</th>
+              <th class="firstTh">수익률</th>
+              <th class="firstTh">거래소</th>
+            </thead>
+            <tbody class="firstTableBody">
+              <tr th:each="data : ${data}">
+                <td th:text="${ data.coinName }">더미</td>
+                <td th:text="${data.bigAmount}">더미</td>
+                <td th:text="${ data.bigNow }">더미</td>
+                <td th:text="${ data.bigBuy }">더미</td>
+                <td th:text="${ #numbers.formatCurrency( data.sumBuyPrice ) }">
+                  더미
+                </td>
+                <td th:text="${ #numbers.formatCurrency( data.sumNowPrice) }">
+                  더미
+                </td>
+                <td th:text="${ data.earning }">더미</td>
+                <td class="rate" th:text="${ data.rateOfReturn + '%' }">
+                  더미
+                </td>
+                <td><img class="trader" th:src="${data.trader}" alt="" /></td>
+              </tr>
+            </tbody>
           </table>
         </div>
-
         <table border="1" class="sum">
           <colgroup>
             <col width="25%" />
@@ -204,6 +211,18 @@
     </div>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script>
+      for (let i = 0; i < $(".firstTh").length; i++) {
+        let trWidth = $(".firstTableBody")
+          .children("tr")
+          .eq(0)
+          .children("td")
+          .eq(i)
+          .prop("offsetWidth");
+        $(".firstTh")
+          .eq(i)
+          .css("width", trWidth - 10.5);
+      }
+
       $(".select_box").hover(
         function () {
           $(".option").css("display", "block");

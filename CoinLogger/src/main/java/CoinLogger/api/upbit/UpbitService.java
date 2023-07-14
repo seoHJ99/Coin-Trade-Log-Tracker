@@ -10,8 +10,10 @@ import com.auth0.jwt.algorithms.Algorithm;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -22,11 +24,14 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class UpbitService implements ApiService {
+    private final HttpClient httpClient;
     private final JSONParser jsonParser;
     private final HttpSender httpSender;
     private final PublicMethod publicMethod;
@@ -56,7 +61,6 @@ public class UpbitService implements ApiService {
             httpSender.setServerUrl("https://api.upbit.com");
             httpSender.setApiRequest("/v1/market/all?isDetails=false");
             String list = httpSender.sendApi();
-            System.out.println(list);
             result = publicMethod.jsonToList(list);
 
         }catch (IOException e){
@@ -106,7 +110,7 @@ public class UpbitService implements ApiService {
 
 
     // 주문 내역 가져오기( 체결, 취소 )
-    public List<List<String>> getOrders() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String getOrders() throws NoSuchAlgorithmException, UnsupportedEncodingException {
 //        String accessKey = ("jaGJ8xxzTrxrqJcMPxwGxeAstH38fjXRAYNemMal");
 //        String secretKey = ("N8qFgecKx5B9s7HJJHexrADEDlT2znPSgTYENQCD");
         String serverUrl = ("https://api.upbit.com");
@@ -144,7 +148,7 @@ public class UpbitService implements ApiService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return publicMethod.jsonToList(result);
+        return result;
     }
 
     public Map<String, String> makeSumData(List<AccountDto> dtoList){
@@ -172,10 +176,9 @@ public class UpbitService implements ApiService {
         List<String> myCoinPrice = getMyCoinPrice();
         for (int i = 0; i < accounts.size(); i++) {
             AccountDto oneData = null;
-            System.out.println(accounts.get(i).toString());
             String coin = accounts.get(i).get(0);
             double amount = Double.parseDouble(accounts.get(i).get(1)) + Double.parseDouble(accounts.get(i).get(2));
-            double buyPrice = Double.parseDouble(accounts.get(i).get(2));
+            double buyPrice = Double.parseDouble(accounts.get(i).get(3));
             double price = Double.parseDouble(myCoinPrice.get(i));
             if (amount == 0) {
                 continue;
@@ -194,6 +197,7 @@ public class UpbitService implements ApiService {
                 oneData = AccountDto.builder()
                         .coinName(coin)
                         .ownAmount(amount)
+                        .sumBuyPrice(Double.parseDouble(accounts.get(i).get(3)) * amount)
                         .bigAmount(BigDecimal.valueOf(amount).toPlainString())
                         .buyPrice(buyPrice)
                         .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
@@ -206,11 +210,45 @@ public class UpbitService implements ApiService {
             oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
             double rate = (oneData.getNowPrice() / oneData.getBuyPrice() * 100d) - 100;
             oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
-            oneData.setSumBuyPrice(oneData.getSumNowPrice() + Math.abs(oneData.getEarning()));
             result.add(oneData);
         }
         Collections.sort( result, new CoinSumBuyPriceComparator());
         return result;
+    }
+
+    public List<LogDto> makeLogList() throws UnsupportedEncodingException, NoSuchAlgorithmException, ParseException {
+        List<LogDto> logList = new ArrayList<>();
+        String allLog = getOrders();
+        String[] a = allLog.replaceAll("\\[","").replaceAll("]","").split("},");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+        for(int i =0; i<a.length; i++){
+            if(i < a.length-1){
+                a[i] = a[i] + "}";
+            }
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(a[i]);
+            LogDto logDto = LogDto.builder()
+                    .state((String) jsonObject.get("state"))
+                    .remainAmount((String) jsonObject.get("remaining_volume"))
+                    .signedAmount((String) jsonObject.get("executed_volume"))
+                    .orderAmount((String) jsonObject.get("volume"))
+                    .thatTimePrice((String) jsonObject.get("price"))
+                    .coinName((String) jsonObject.get("market"))
+                    .orderTime(LocalDateTime.parse( jsonObject.get("created_at").toString(), formatter))
+                    .trader("https://files.readme.io/40e45a0-small-upbit_color.png")
+                    .build();
+            if(jsonObject.get("side").equals("bid")){
+                logDto.setOrderSort("매수");
+            }else {
+                logDto.setOrderSort("매도");
+            }
+            if(jsonObject.get("side").equals("done")){
+                logDto.setState("체결");
+            }else {
+                logDto.setState("취소");
+            }
+            logList.add(logDto);
+        }
+        return logList;
     }
 
 }

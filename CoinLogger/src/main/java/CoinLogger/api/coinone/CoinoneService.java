@@ -2,9 +2,9 @@ package CoinLogger.api.coinone;
 
 import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
-import CoinLogger.api.LogDto;
 import CoinLogger.api.OrderTimeComparator;
 import CoinLogger.api.upbit.AccountDto;
+import CoinLogger.api.upbit.LogDto;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
@@ -28,9 +28,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -108,7 +106,7 @@ public class CoinoneService {
             for (int i = 0; i < notDone.size(); i++) {
                 Long milliSec = Long.valueOf(notDone.get(i).get(10));
                 LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliSec), ZoneId.systemDefault());
-                LogDto_Coinone oneData = LogDto_Coinone.builder()
+                LogDto oneData = LogDto.builder()
                         .state("waiting")
                         .orderAmount(notDone.get(i).get(7))
                         .orderSort(notDone.get(i).get(4))
@@ -123,28 +121,29 @@ public class CoinoneService {
             }
         }
 
-        for(int i = 0; i < done.size(); i++){
-            Long milliSec = Long.valueOf(done.get(i).get(12));
-            LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliSec), ZoneId.systemDefault());
-            String sort = "";
-            if(done.get(i).get(5).equals("true")){
-                sort = "매도";
-            }else {
-                sort = "매수";
+        if(!done.get(0).isEmpty()) {
+            for (int i = 0; i < done.size(); i++) {
+                Long milliSec = Long.valueOf(done.get(i).get(12));
+                LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliSec), ZoneId.systemDefault());
+                String sort = "";
+                if (done.get(i).get(5).equals("true")) {
+                    sort = "매도";
+                } else {
+                    sort = "매수";
+                }
+                LogDto oneData = LogDto.builder()
+                        .state("done")
+                        .orderAmount(done.get(i).get(8))
+                        .orderSort(sort)
+                        .coinName(done.get(i).get(0))
+                        .remainAmount("0")
+                        .signedAmount(done.get(i).get(8))
+                        .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
+                        .thatTimePrice(done.get(i).get(7))
+                        .orderTime(time)
+                        .build();
+                result.add(oneData);
             }
-            LogDto_Coinone oneData = LogDto_Coinone.builder()
-                    .state("done")
-                    .orderAmount(done.get(i).get(8))
-                    .orderSort(sort)
-                    .coinName(done.get(i).get(0))
-                    .remainAmount("0")
-                    .signedAmount(done.get(i).get(8))
-                    .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
-                    .thatTimePrice(done.get(i).get(7))
-                    .orderTime(time)
-                    .build();
-            result.add( oneData);
-
         }
         Collections.sort(result, new OrderTimeComparator());
         return result;
@@ -177,6 +176,7 @@ public class CoinoneService {
             HttpResponse httpResponse = httpClient.execute(httpPost);
 
             result = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -202,11 +202,11 @@ public class CoinoneService {
             httpPost.setHeader("Content-type", "application/json");
             httpPost.addHeader("X-COINONE-PAYLOAD", base64EncodedPayload);
             httpPost.addHeader("X-COINONE-SIGNATURE", signature);
-
             StringEntity requestEntity = new StringEntity(body);
             httpPost.setEntity(requestEntity);
             HttpResponse httpResponse = httpClient.execute(httpPost);
             result = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -311,7 +311,7 @@ public class CoinoneService {
             oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
             double rate = (oneData.getNowPrice() / oneData.getBuyPrice() * 100d) - 100;
             oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
-            oneData.setSumBuyPrice(oneData.getSumNowPrice() + Math.abs(oneData.getEarning()));
+            oneData.setSumBuyPrice(oneData.getOwnAmount() * oneData.getBuyPrice());
             result.add(oneData);
         }
         Collections.sort( result, new CoinSumBuyPriceComparator());

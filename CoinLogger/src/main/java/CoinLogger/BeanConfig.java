@@ -35,5 +35,4 @@ public class BeanConfig {
         numberFormat.setGroupingUsed(false);
         return numberFormat;
     }
-
 }

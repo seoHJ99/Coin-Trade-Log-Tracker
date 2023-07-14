@@ -1,17 +1,15 @@
 package CoinLogger.api.coinone;
 
-import CoinLogger.api.LogDto;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LogDto_Coinone implements LogDto {
+public class LogDto_Coinone  {
 
     private LocalDateTime orderTime;
     private String orderSort;
@@ -25,7 +23,6 @@ public class LogDto_Coinone implements LogDto {
     private String timeStr;
     private String trader;
 
-    @Override
     public String getTimeStr() {
         return null;
     }

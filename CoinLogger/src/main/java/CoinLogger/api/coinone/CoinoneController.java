@@ -1,5 +1,6 @@
 package CoinLogger.api.coinone;
 
+import CoinLogger.PublicMethod;
 import CoinLogger.api.upbit.AccountDto;
 import lombok.*;
 import org.json.simple.parser.ParseException;
@@ -33,6 +34,7 @@ public class CoinoneController {
         secondData.put("totalNowPrice", totalNowPrice + "");
         secondData.put("totalEarning", totalEarning + "");
         secondData.put("avgRate", avgRate + "");
+
         model.addAttribute("data", dtoList);
         model.addAttribute("secondData", secondData);
       return "AccountsListPage";
@@ -41,7 +43,6 @@ public class CoinoneController {
     @GetMapping("/coinone/{id}/all-trade-log")
     public String getLog(Model model) throws ParseException {
         model.addAttribute("log", coinoneService.getAllLog());
-
         return "LogListPage";
     }
 

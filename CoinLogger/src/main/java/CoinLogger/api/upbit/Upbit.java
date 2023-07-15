@@ -1,8 +1,6 @@
 package CoinLogger.api.upbit;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -11,6 +9,8 @@ import javax.persistence.*;
 @Getter
 @Builder
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Upbit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

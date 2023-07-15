@@ -229,6 +229,7 @@ public class UpbitService implements ApiService {
     public List<LogDto> makeLogList() throws UnsupportedEncodingException, NoSuchAlgorithmException, ParseException {
         List<LogDto> logList = new ArrayList<>();
         String allLog = getOrders();
+        System.out.println("allLog = " + allLog);
         String[] a = allLog.replaceAll("\\[","").replaceAll("]","").split("},");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
         for(int i =0; i<a.length; i++){

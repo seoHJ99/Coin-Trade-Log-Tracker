@@ -204,21 +204,30 @@
           <th>총 수익률</th>
           <tr>
             <td
+              th:if="${secondData}"
               th:text="${ #numbers.formatInteger(secondData['totalBuyPrice'], 3, 'COMMA')}"
             >
               더미
             </td>
             <td
+              th:if="${secondData}"
               th:text="${ #numbers.formatInteger(secondData['totalNowPrice'], 3, 'COMMA')}"
             >
               더미
             </td>
             <td
+              th:if="${secondData}"
               th:text="${ #numbers.formatInteger(secondData['totalEarning'], 3, 'COMMA')}"
             >
               더미
             </td>
-            <td class="rate" th:text="${secondData['avgRate'] + '%'}">더미</td>
+            <td
+              th:if="${secondData}"
+              class="rate"
+              th:text="${secondData['avgRate'] + '%'}"
+            >
+              더미
+            </td>
           </tr>
         </table>
       </div>

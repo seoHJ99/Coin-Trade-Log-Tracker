@@ -2,9 +2,7 @@ package CoinLogger.api;
 
 import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
-import CoinLogger.api.NameComparator;
 import CoinLogger.api.binance.BinanceService;
-import CoinLogger.api.binance.LogTimeComparator;
 import CoinLogger.api.coinone.CoinoneService;
 import CoinLogger.api.upbit.AccountDto;
 import CoinLogger.api.upbit.LogDto;
@@ -14,9 +12,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 

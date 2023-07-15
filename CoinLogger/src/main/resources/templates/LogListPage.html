@@ -189,7 +189,7 @@
           </div>
           <div class="list">
             <table class="seperate">
-              <tr th:each="log : ${log}">
+              <tr th:if="${log}" th:each="log : ${log}">
                 <td th:text="${ log.orderTime }">더미</td>
                 <td class="sort" th:text="${ log.orderSort }">더미</td>
                 <td th:text="${ log.coinName }">더미</td>

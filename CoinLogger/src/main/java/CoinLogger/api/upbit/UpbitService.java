@@ -35,14 +35,29 @@ public class UpbitService implements ApiService {
     private final JSONParser jsonParser;
     private final HttpSender httpSender;
     private final PublicMethod publicMethod;
+    private final UpbitRepository upbitRepository;
+    private String accessKey = ("jaGJ8xxzTrxrqJcMPxwGxeAstH38fjXRAYNemMal"); // 받아오기
+    private String secretKey = ("N8qFgecKx5B9s7HJJHexrADEDlT2znPSgTYENQCD"); // 받아오기
+
+    public boolean getKeys(){
+        //id는 나중에
+        String id = "test2222";
+        //
+        Upbit upbit = upbitRepository.findByOwnerId(id);
+        if(upbit != null){
+            accessKey = upbit.getAccessKey();
+            secretKey = upbit.getSecretKey();
+            return true;
+        }else {
+            return false;
+        }
+    }
 
     // 계좌 정보
     //         1              2                  3         4            5              6
     // 순서 : 이름, 보유 수량 중 주문 가능한 수량, 묶여있는 수량, 매수평균가, 매수평균가 수정여부, 평단가 기준 화폐
     @Override
     public List<List<String>> getAccounts() throws IOException {
-        String accessKey = ("jaGJ8xxzTrxrqJcMPxwGxeAstH38fjXRAYNemMal"); // 받아오기
-        String secretKey = ("N8qFgecKx5B9s7HJJHexrADEDlT2znPSgTYENQCD"); // 받아오기
 
         httpSender.setServerUrl("https://api.upbit.com");
         httpSender.setApiRequest("/v1/accounts");
@@ -51,8 +66,6 @@ public class UpbitService implements ApiService {
         List<List<String>>  result = publicMethod.jsonToList(responseJson);
         return result;
     }
-
-
 
     // 코인 이름 리스트
     public List<List<String>> getCoinList() {
@@ -111,11 +124,8 @@ public class UpbitService implements ApiService {
 
     // 주문 내역 가져오기( 체결, 취소 )
     public String getOrders() throws NoSuchAlgorithmException, UnsupportedEncodingException {
-//        String accessKey = ("jaGJ8xxzTrxrqJcMPxwGxeAstH38fjXRAYNemMal");
-//        String secretKey = ("N8qFgecKx5B9s7HJJHexrADEDlT2znPSgTYENQCD");
+
         String serverUrl = ("https://api.upbit.com");
-        String accessKey = ("jaGJ8xxzTrxrqJcMPxwGxeAstH38fjXRAYNemMal"); // 받아오기
-        String secretKey = ("N8qFgecKx5B9s7HJJHexrADEDlT2znPSgTYENQCD"); // 받아오기
 
         ArrayList<String> queryElements = new ArrayList<>();
 
@@ -241,7 +251,7 @@ public class UpbitService implements ApiService {
             }else {
                 logDto.setOrderSort("매도");
             }
-            if(jsonObject.get("side").equals("done")){
+            if(jsonObject.get("state").equals("done")){
                 logDto.setState("체결");
             }else {
                 logDto.setState("취소");

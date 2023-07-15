@@ -38,9 +38,10 @@ public class CoinoneService {
     private final PublicMethod publicMethod;
     private final JSONParser jsonParser;
     private final HttpClient httpClient = HttpClientBuilder.create().build();
-    private final String ACCESS_TOKEN = "1da9e4b2-11f5-4558-9522-b4f50ca2bb6b";
-    private final String SECRET_KEY = "9ef621f6-9bd4-4c1e-96ec-0ffed6f6d1bc";
+    private String ACCESS_TOKEN = "1da9e4b2-11f5-4558-9522-b4f50ca2bb6b";
+    private String SECRET_KEY = "9ef621f6-9bd4-4c1e-96ec-0ffed6f6d1bc";
     private final ObjectMapper om = new ObjectMapper();
+    private final CoinoneRepository coinoneRepository;
 
     @Getter
     static class Payload {
@@ -63,6 +64,20 @@ public class CoinoneService {
             this.size = size;
             this.from_ts = from_ts;
             this.to_ts = to_ts;
+        }
+    }
+
+    public boolean getKeys(){
+        //id는 나중에
+        String id = "test2222";
+        //
+        Coinone coinone = coinoneRepository.findByOwnerId(id);
+        if(coinone !=null){
+            ACCESS_TOKEN = coinone.getAccessKey();
+            SECRET_KEY = coinone.getSecretKey();
+            return true;
+        }else {
+            return false;
         }
     }
 

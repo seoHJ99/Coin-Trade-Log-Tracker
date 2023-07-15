@@ -32,12 +32,16 @@
       }
       .main {
         display: flex;
+        flex-direction: column;
         justify-content: center;
+        align-items: center;
         width: 100%;
       }
       .coin_name {
+        margin-top: 80px;
         display: flex;
         justify-content: center;
+        align-items: center;
         flex-direction: column;
         width: 820px;
       }
@@ -64,16 +68,32 @@
         background-color: #e1e0e0;
         border: 1px solid black;
       }
+      input[type="text"] {
+        background-color: #e1e0e0;
+      }
+      a {
+        color: black;
+        text-decoration: none;
+      }
     </style>
   </head>
   <body>
     <div class="contain_all">
       <div class="header">
-        <div><h1>코인 현황판</h1></div>
+        <div>
+          <h1><a href="/all/account">코인 현황판</a></h1>
+        </div>
         <div class="logout_btn">
           <a href="#">로그아웃</a>
-          <a href="#" class="">내 정보</a>
+          <a href="/myinfo/keys" class="">내 정보</a>
         </div>
+      </div>
+      <div>
+        <span
+          ><a href="/binance/wallet">
+            &#8594; 바이낸스 지갑 저장하러 가기 &#8592;
+          </a></span
+        >
       </div>
       <div class="main">
         <div class="coin_name">
@@ -81,14 +101,13 @@
             <input type="checkbox" id="upbit" class="coin_check_box" />
             <label for="upbit">업비트</label>
           </div>
-
           <div class="key_row">
             <span>엑세스 키 : </span>
             <input
               type="text"
               placeholder="엑세스 키"
               readonly
-              class="first_input keys"
+              class="first_input upbit"
             />
           </div>
           <div class="key_row">
@@ -97,7 +116,55 @@
               type="text"
               placeholder="시크릿 키"
               readonly
-              class="second_input keys"
+              class="second_input upbit"
+            />
+          </div>
+        </div>
+        <div class="coin_name">
+          <div class="coin_check">
+            <input type="checkbox" id="coinone" class="coin_check_box" />
+            <label for="coinone">코인원</label>
+          </div>
+          <div class="key_row">
+            <span>엑세스 키 : </span>
+            <input
+              type="text"
+              placeholder="엑세스 키"
+              readonly
+              class="first_input coinone"
+            />
+          </div>
+          <div class="key_row">
+            <span>시크릿 키 : </span>
+            <input
+              type="text"
+              placeholder="시크릿 키"
+              readonly
+              class="second_input coinone"
+            />
+          </div>
+        </div>
+        <div class="coin_name">
+          <div class="coin_check">
+            <input type="checkbox" id="binance" class="coin_check_box" />
+            <label for="binance">바이낸스</label>
+          </div>
+          <div class="key_row">
+            <span>엑세스 키 : </span>
+            <input
+              type="text"
+              placeholder="엑세스 키"
+              readonly
+              class="first_input binance"
+            />
+          </div>
+          <div class="key_row">
+            <span>시크릿 키 : </span>
+            <input
+              type="text"
+              placeholder="시크릿 키"
+              readonly
+              class="second_input binance"
             />
           </div>
         </div>
@@ -110,20 +177,62 @@
 
     <script>
       $(".coin_check_box").change(function () {
-        readonlyCon();
+        readonlyCon($(this).prop("id"));
+      });
+      function readonlyCon(id) {
+        let status = $("#" + id).prop("checked");
+        $("." + id).each(function () {
+          $("." + id).prop("readonly", !status);
+          if (status == true) {
+            for (let i = 0; i < 2; i++) {
+              $("." + id)
+                .eq(i)
+                .css("background", "white");
+            }
+          } else {
+            for (let i = 0; i < 2; i++) {
+              $("." + id)
+                .eq(i)
+                .css("background", "#e1e0e0");
+            }
+          }
+        });
+      }
+
+      $(".save").on("click", function () {
+        sendInfo();
       });
 
-      function readonlyCon() {
-        const inputList = $(".keys");
-        inputList.each(function () {
-          let status = $(this).prop("readonly");
-          console.log(status);
-          $(this).prop("readonly", !status);
-          if (status == true) {
-            $(this).css("background", "white");
-          } else {
-            $(this).css("background", "#e1e0e0");
-          }
+      function sendInfo() {
+        let data = {};
+        let ids = ["upbit", "coinone", "binance"];
+        for (id of ids) {
+          let value = [];
+          value.push(
+            $("." + id)
+              .eq(0)
+              .val()
+          );
+          value.push(
+            $("." + id)
+              .eq(1)
+              .val()
+          );
+          data[id] = value;
+        }
+        $.ajax({
+          type: "POST",
+          async: false,
+          url: "/api/key",
+          traditional: false,
+          contentType: "application/json",
+          data: JSON.stringify(data),
+          error: function (e) {
+            alert("오류 발생");
+          },
+          success: function (e) {
+            // location.href = location.href;
+          },
         });
       }
     </script>

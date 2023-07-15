@@ -16,34 +16,42 @@ public class CoinoneController {
 
     private final CoinoneService coinoneService;
 
-    @GetMapping("/coinone/{id}/accounts")
+    @GetMapping("/coinone/account")
     public String getAccount(Model model) throws ParseException {
-        List<AccountDto> dtoList =  coinoneService.accountDtoMaker();
-        Map<String, String> secondData = new HashMap<>();
-        int totalBuyPrice = 0;
-        int totalNowPrice = 0;
-        int totalEarning = 0;
+        if(coinoneService.getKeys()) {
+            List<AccountDto> dtoList = coinoneService.accountDtoMaker();
+            Map<String, String> secondData = new HashMap<>();
+            int totalBuyPrice = 0;
+            int totalNowPrice = 0;
+            int totalEarning = 0;
 
-        for(AccountDto dto : dtoList){
-            totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
-            totalEarning += dto.getEarning();
-            totalNowPrice += dto.getSumNowPrice();
+            for (AccountDto dto : dtoList) {
+                totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
+                totalEarning += dto.getEarning();
+                totalNowPrice += dto.getSumNowPrice();
+            }
+            double avgRate = (int) ((double) totalEarning / totalBuyPrice * 10000d) / 100d;
+            secondData.put("totalBuyPrice", totalBuyPrice + "");
+            secondData.put("totalNowPrice", totalNowPrice + "");
+            secondData.put("totalEarning", totalEarning + "");
+            secondData.put("avgRate", avgRate + "");
+
+            model.addAttribute("data", dtoList);
+            model.addAttribute("secondData", secondData);
+        }else {
+            model.addAttribute("data", null);
+            model.addAttribute("secondData", null);
         }
-        double avgRate = (int)((double)totalEarning/totalBuyPrice * 10000d)/100d;
-        secondData.put("totalBuyPrice", totalBuyPrice + "");
-        secondData.put("totalNowPrice", totalNowPrice + "");
-        secondData.put("totalEarning", totalEarning + "");
-        secondData.put("avgRate", avgRate + "");
-
-        model.addAttribute("data", dtoList);
-        model.addAttribute("secondData", secondData);
       return "AccountsListPage";
     }
 
-    @GetMapping("/coinone/{id}/all-trade-log")
+    @GetMapping("/coinone/all-trade-log")
     public String getLog(Model model) throws ParseException {
-        model.addAttribute("log", coinoneService.getAllLog());
+        if(coinoneService.getKeys()) {
+            model.addAttribute("log", coinoneService.getAllLog());
+        }else {
+            model.addAttribute("log", null);
+        }
         return "LogListPage";
     }
-
 }

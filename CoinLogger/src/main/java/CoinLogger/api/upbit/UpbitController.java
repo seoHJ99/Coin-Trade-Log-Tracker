@@ -6,30 +6,37 @@ import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
-public class ViewController {
+public class UpbitController {
     private final UpbitService upbit;
-    @GetMapping("/upbit/{id}/accounts")
+    @GetMapping("/upbit/account")
     public String getAllAccounts(Model model) throws IOException, ParseException {
-        List<AccountDto> dtoList = upbit.accountDtoMaker();
-        Map<String, String> secondData = upbit.makeSumData(dtoList);
-        model.addAttribute( "data", dtoList);
-        model.addAttribute("secondData", secondData);
+        if(upbit.getKeys()) {
+            List<AccountDto> dtoList = upbit.accountDtoMaker();
+            Map<String, String> secondData = upbit.makeSumData(dtoList);
+            model.addAttribute("data", dtoList);
+            model.addAttribute("secondData", secondData);
+        }else {
+            model.addAttribute("data", null);
+            model.addAttribute("secondData", null);
+        }
         return "AccountsListPage";
     }
 
-    @GetMapping("upbit/{id}/all-trade-log")
+    @GetMapping("upbit/all-trade-log")
     public String getTradeLog(Model model) throws UnsupportedEncodingException, NoSuchAlgorithmException, ParseException {
-         model.addAttribute("log", upbit.makeLogList());
+        if(upbit.getKeys()) {
+            model.addAttribute("log", upbit.makeLogList());
+        }else {
+            model.addAttribute("log", null);
+        }
          return "LogListPage";
     }
 }

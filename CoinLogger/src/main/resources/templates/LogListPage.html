@@ -124,15 +124,21 @@
       .trader {
         width: 50px;
       }
+      a {
+        color: black;
+        text-decoration: none;
+      }
     </style>
   </head>
   <body>
     <div class="contain_all">
       <div class="header">
-        <div><h1>코인 현황판</h1></div>
+        <div>
+          <h1><a href="/all/account">코인 현황판</a></h1>
+        </div>
         <div class="logout_btn">
           <a href="#">로그아웃</a>
-          <a href="#" class="">내 정보</a>
+          <a href="/myinfo/keys" class="">내 정보</a>
         </div>
       </div>
       <div class="nav">
@@ -149,21 +155,21 @@
         </div>
         <span>
           <input type="radio" id="all" name="radio_check" checked value="all" />
-          <label for="upbit">전체</label>
+          <label for="all">전체</label>
         </span>
         <span>
           <input type="radio" id="upbit" name="radio_check" value="upbit" />
           <label for="upbit">업비트</label>
         </span>
         <span>
-          <input type="radio" id="coinone" name="radio_check" value="upbit" />
-          <label for="upbit">코인원</label>
+          <input type="radio" id="coinone" name="radio_check" value="coinone" />
+          <label for="coinone">코인원</label>
         </span>
         <span>
-          <input type="radio" id="binance" name="radio_check" value="upbit" />
-          <label for="upbit">바이낸스</label>
+          <input type="radio" id="binance" name="radio_check" value="binance" />
+          <label for="binance">바이낸스</label>
         </span>
-        <button class="search">조회</button>
+        <input type="button" class="search" value="조회" />
       </div>
       <div class="main">
         <div class="table">
@@ -250,19 +256,7 @@
         } else {
           option = "all-trade-log";
         }
-
-        let id = 0; // 나중에 설정해주기
-        $.ajax({
-          type: "GET",
-          async: false,
-          url: "/" + value + "/" + id + "/" + option,
-          error: function (e) {
-            alert("오류 발생");
-          },
-          success: function (e) {
-            location.href = "/" + value + "/" + id + "/" + option;
-          },
-        });
+        location.href = "/" + value + "/" + option;
       }
     </script>
   </body>

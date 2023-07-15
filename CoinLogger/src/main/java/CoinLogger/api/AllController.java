@@ -1,6 +1,7 @@
 package CoinLogger.api;
 
 import CoinLogger.CoinSumBuyPriceComparator;
+import CoinLogger.PublicMethod;
 import CoinLogger.api.NameComparator;
 import CoinLogger.api.binance.BinanceService;
 import CoinLogger.api.binance.LogTimeComparator;
@@ -12,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -25,44 +26,53 @@ public class AllController {
     private final BinanceService binanceService;
     private final UpbitService upbitService;
     private final CoinoneService coinoneService;
+    private final PublicMethod publicMethod;
+    private final AllService allService;
 
-    @GetMapping("/all/{id}/account")
+    @GetMapping("/all/account")
     public String getAllAccount(Model model) throws IOException, ParseException {
-        List<AccountDto> coinones = coinoneService.accountDtoMaker();
-        List<AccountDto> binances = binanceService.accountDtoMaker();
-        List<AccountDto> allAccount =  upbitService.accountDtoMaker();
-        allAccount.addAll(coinones);
-        allAccount.addAll(binances);
-        Collections.sort(allAccount, new CoinSumBuyPriceComparator());
-
-        Map<String, String> secondData = new HashMap<>();
-        int totalBuyPrice = 0;
-        int totalNowPrice = 0;
-        int totalEarning = 0;
-
-        for(AccountDto dto : allAccount){
-            totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
-            totalEarning += dto.getEarning();
-            totalNowPrice += dto.getSumNowPrice();
+        List<AccountDto> allAccount = new ArrayList<>();
+        if(coinoneService.getKeys()){
+            allAccount.addAll( coinoneService.accountDtoMaker());
         }
-        double avgRate = (int)((double)totalEarning/totalBuyPrice * 10000d)/100d;
-        secondData.put("totalBuyPrice", totalBuyPrice + "");
-        secondData.put("totalNowPrice", totalNowPrice + "");
-        secondData.put("totalEarning", totalEarning + "");
-        secondData.put("avgRate", avgRate + "");
-
+        if(coinoneService.getKeys()){
+            allAccount.addAll( binanceService.accountDtoMaker());
+        }
+        if(coinoneService.getKeys()){
+            allAccount.addAll( upbitService.accountDtoMaker());
+        }
+        Collections.sort(allAccount, new CoinSumBuyPriceComparator());
+        Map<String, String> secondData = publicMethod.makeSumData(allAccount);
         model.addAttribute("data", allAccount);
         model.addAttribute("secondData", secondData);
         return "AccountsListPage";
     }
 
-    @GetMapping("all/{id}/all-trade-log")
+    @GetMapping("/all/all-trade-log")
     public String getAllLog(Model model) throws IOException, NoSuchAlgorithmException, ParseException {
-        List<LogDto> allLog = upbitService.makeLogList();
-        allLog.addAll(coinoneService.getAllLog());
-        allLog.addAll(binanceService.getAllCoinLog());
-        Collections.sort(allLog, new LogTimeComparator());
+        List<LogDto> allLog = new ArrayList<>();
+        if(coinoneService.getKeys()){
+            allLog.addAll( coinoneService.getAllLog());
+        }
+        if(binanceService.getKeys()){
+            allLog.addAll( binanceService.getAllCoinLog());
+        }
+        if(upbitService.getKeys()){
+            allLog.addAll( upbitService.makeLogList());
+        }
         model.addAttribute("log", allLog);
         return "LogListPage";
+    }
+
+    @GetMapping("/myinfo/keys")
+    public String myApiKeys(){
+        return "MyInfo";
+    }
+
+    @PostMapping("/api/key")
+    @ResponseBody
+    public String saveKeys(@RequestBody Map<String, String[]> data){
+        allService.saveKeys(data);
+        return "";
     }
 }

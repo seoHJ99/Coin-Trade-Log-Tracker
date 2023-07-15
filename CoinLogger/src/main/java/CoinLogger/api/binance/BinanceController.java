@@ -1,6 +1,7 @@
 package CoinLogger.api.binance;
 
 
+import CoinLogger.PublicMethod;
 import CoinLogger.api.upbit.AccountDto;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.parser.ParseException;
@@ -16,26 +17,41 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BinanceController {
     private final BinanceService binanceService;
+    private final PublicMethod publicMethod;
 
-    @GetMapping("/binance/{id}/account")
+    @GetMapping("/binance/account")
     public String getAccount(Model model) throws IOException, ParseException {
-        List<AccountDto> dtoList = binanceService.accountDtoMaker();
-        Map<String, String> secondData = binanceService.makeSumData(dtoList);
-        model.addAttribute("data", dtoList);
-        model.addAttribute("secondData", secondData);
+        if(binanceService.getKeys()){
+            List<AccountDto> dtoList = binanceService.accountDtoMaker();
+            Map<String, String> secondData = publicMethod.makeSumData(dtoList);
+            model.addAttribute("data", dtoList);
+            model.addAttribute("secondData", secondData);
+        }else {
+            model.addAttribute("data", null);
+            model.addAttribute("secondData", null);
+        }
+
         return "AccountsListPage";
     }
 
     @GetMapping("/binance/wallet")
     public String makeAvgPriceAndSave(Model model) throws IOException, ParseException {
-        List<String> coinName=binanceService.getMyCoinName();
-        model.addAttribute("coinName", coinName);
+        if(binanceService.getKeys()) {
+            List<String> coinName = binanceService.getMyCoinName();
+            model.addAttribute("coinName", coinName);
+        }else {
+            model.addAttribute("coinName", null);
+        }
         return "binanceCoin";
     }
 
-    @GetMapping("/binance/{id}/all-trade-log")
+    @GetMapping("/binance/all-trade-log")
     public String getLog(Model model) throws ParseException, IOException {
-        model.addAttribute("log", binanceService.getAllCoinLog());
+        if(binanceService.getKeys()) {
+            model.addAttribute("log", binanceService.getAllCoinLog());
+        }else {
+            model.addAttribute("log", null);
+        }
         return "LogListPage";
     }
 

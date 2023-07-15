@@ -4,9 +4,7 @@ import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
 import CoinLogger.api.upbit.AccountDto;
 import CoinLogger.api.upbit.LogDto;
-import javassist.bytecode.analysis.Type;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -30,12 +28,25 @@ public class BinanceService {
     private final JSONParser jsonParser;
     private final PublicMethod publicMethod;
     private final MemberCoinListRepository memberCoinListRepository;
+
+    private final BinanceRepository binanceRepository;
     private double oneDollarWon;
     String secretKey = "o3qjLnuwzNFkh2RQRr8wRCpR8pYqMC1Dt7fF1B9T6xggn73ksNAQSmBUTeeRzpUL";
     String accessKey = "lTJrdh5xuwUhaeUiYHNP3pMYP7MEPKoDM3h9L4Ka6jy7VZiBlKXPbHKNDh7UuFME";
     String serverUrl = "https://api.binance.com";
     int plusTime = 0;
 
+    public boolean getKeys(){
+        String id = "test2222";
+        Binance binance = binanceRepository.findByOwnerId(id);
+        if(binance != null) {
+            secretKey = binance.getSecretKey();
+            accessKey = binance.getAccessKey();
+            return true;
+        }else {
+            return false;
+        }
+    }
 
     public String getOneCoinTradeLog(String coinName) throws IOException, ParseException {
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);

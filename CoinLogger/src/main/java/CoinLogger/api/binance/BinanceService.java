@@ -48,7 +48,7 @@ public class BinanceService {
         }
     }
 
-    public String getOneCoinTradeLog(String coinName) throws IOException, ParseException {
+    public String getOneCoinTradeLog(String coinName) throws IOException {
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
         String timestamp = Long.toString(System.currentTimeMillis() + plusTime);

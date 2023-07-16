@@ -47,11 +47,11 @@ public class CoinoneController {
 
     @GetMapping("/coinone/all-trade-log")
     public String getLog(Model model) throws ParseException {
-        if(coinoneService.getKeys()) {
+//        if(coinoneService.getKeys()) {
             model.addAttribute("log", coinoneService.getAllLog());
-        }else {
-            model.addAttribute("log", null);
-        }
+//        }else {
+//            model.addAttribute("log", null);
+//        }
         return "LogListPage";
     }
 }

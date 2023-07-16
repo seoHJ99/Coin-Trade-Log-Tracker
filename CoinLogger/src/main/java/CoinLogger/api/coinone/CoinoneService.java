@@ -2,6 +2,7 @@ package CoinLogger.api.coinone;
 
 import CoinLogger.CoinSumBuyPriceComparator;
 import CoinLogger.PublicMethod;
+import CoinLogger.api.CustomException;
 import CoinLogger.api.OrderTimeComparator;
 import CoinLogger.api.upbit.AccountDto;
 import CoinLogger.api.upbit.LogDto;
@@ -67,16 +68,16 @@ public class CoinoneService {
         }
     }
 
-    public boolean getKeys(){
+    public boolean getKeys() {
         //id는 나중에
         String id = "test2222";
         //
         Coinone coinone = coinoneRepository.findByOwnerId(id);
-        if(coinone !=null){
+        if (coinone != null) {
             ACCESS_TOKEN = coinone.getAccessKey();
             SECRET_KEY = coinone.getSecretKey();
             return true;
-        }else {
+        } else {
             return false;
         }
     }
@@ -114,10 +115,10 @@ public class CoinoneService {
 
     public List<LogDto> getAllLog() throws ParseException {
         List<List<String>> notDone = getNotDoneOrder();
-        List<List<String>> done  = getDoneOrder();
+        List<List<String>> done = getDoneOrder();
         List<LogDto> result = new ArrayList<>();
 
-        if(!notDone.get(0).isEmpty()) {
+        if (!notDone.get(0).isEmpty()) {
             for (int i = 0; i < notDone.size(); i++) {
                 Long milliSec = Long.valueOf(notDone.get(i).get(10));
                 LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliSec), ZoneId.systemDefault());
@@ -136,7 +137,7 @@ public class CoinoneService {
             }
         }
 
-        if(!done.get(0).isEmpty()) {
+        if (!done.get(0).isEmpty()) {
             for (int i = 0; i < done.size(); i++) {
                 Long milliSec = Long.valueOf(done.get(i).get(12));
                 LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliSec), ZoneId.systemDefault());
@@ -221,12 +222,29 @@ public class CoinoneService {
             httpPost.setEntity(requestEntity);
             HttpResponse httpResponse = httpClient.execute(httpPost);
             result = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
-        result = jsonObject.get("open_orders").toString();
+        try {
+            result = jsonObject.get("open_orders").toString();
+        } catch (NullPointerException e) {
+            Object error_code = jsonObject.get("error_code");
+            if (error_code.equals("4")) {
+                System.out.println("제한된 사용자입니다.");
+
+            } else if (error_code.equals("11")) {
+                System.out.println("엑세스 토큰이 존재하지 않습니다.");
+            } else if (error_code.equals("40")) {
+                throw new CustomException("승인되지 않은 api입니다.");
+            } else if (error_code.equals("107")) {
+                throw new CustomException("파라미터 에러입니다.");
+            } else {
+                e.printStackTrace();
+            }
+            return ;
+        }
+
         return publicMethod.jsonToList(result);
     }
 
@@ -293,9 +311,9 @@ public class CoinoneService {
             }
             String mapValue = coinMap.get(coin.toLowerCase());
             double price;
-            if( mapValue == null){
-                price =0;
-            }else {
+            if (mapValue == null) {
+                price = 0;
+            } else {
                 price = Double.parseDouble(mapValue);
             }
 
@@ -329,7 +347,7 @@ public class CoinoneService {
             oneData.setSumBuyPrice(oneData.getOwnAmount() * oneData.getBuyPrice());
             result.add(oneData);
         }
-        Collections.sort( result, new CoinSumBuyPriceComparator());
+        Collections.sort(result, new CoinSumBuyPriceComparator());
         return result;
     }
 }

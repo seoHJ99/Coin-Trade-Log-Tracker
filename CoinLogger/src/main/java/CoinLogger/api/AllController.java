@@ -45,16 +45,22 @@ public class AllController {
     }
 
     @GetMapping("/all/all-trade-log")
-    public String getAllLog(Model model) throws IOException, NoSuchAlgorithmException, ParseException {
+    public String getAllLog(Model model) throws NoSuchAlgorithmException {
         List<LogDto> allLog = new ArrayList<>();
-        if(coinoneService.getKeys()){
-            allLog.addAll( coinoneService.getAllLog());
-        }
-        if(binanceService.getKeys()){
-            allLog.addAll( binanceService.getAllCoinLog());
-        }
-        if(upbitService.getKeys()){
-            allLog.addAll( upbitService.makeLogList());
+        try {
+            if (coinoneService.getKeys()) {
+                allLog.addAll(coinoneService.getAllLog());
+            }
+            if (binanceService.getKeys()) {
+                allLog.addAll(binanceService.getAllCoinLog());
+            }
+            if (upbitService.getKeys()) {
+                allLog.addAll(upbitService.makeLogList());
+            }
+        }catch (IOException ioException){
+            System.out.println("통신오류");
+        } catch (ParseException parseException){
+            System.out.println("Json 파싱 오류");
         }
         model.addAttribute("log", allLog);
         return "LogListPage";

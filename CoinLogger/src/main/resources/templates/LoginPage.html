@@ -40,7 +40,7 @@
         margin: 5px;
       }
       .submit {
-        width: 100%;
+        width: 97%;
       }
 
       .find_button {
@@ -51,6 +51,9 @@
       }
       .find_pw {
         flex-grow: 1;
+      }
+      .joinBtn {
+        width: 97%;
       }
       a {
         color: black;
@@ -64,7 +67,9 @@
       <div class="main">
         <div class="login_box">
           <form action="/loginAction" method="post">
-            <div class="login_text">로그인</div>
+            <div class="login_text">
+              <h1>로그인</h1>
+            </div>
             <div>
               <input type="text" class="input_box" name="userId" />
               <br />
@@ -82,6 +87,7 @@
             <div>
               <input
                 type="button"
+                class="joinBtn button"
                 value="회원가입"
                 onclick="location.href='/join';"
               />

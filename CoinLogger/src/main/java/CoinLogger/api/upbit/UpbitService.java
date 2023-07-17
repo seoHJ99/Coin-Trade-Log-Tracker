@@ -13,7 +13,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -36,8 +36,8 @@ public class UpbitService implements ApiService {
     private final HttpSender httpSender;
     private final PublicMethod publicMethod;
     private final UpbitRepository upbitRepository;
-    private String accessKey = ("jaGJ8xxzTrxrqJcMPxwGxeAstH38fjXRAYNemMal"); // 받아오기
-    private String secretKey = ("N8qFgecKx5B9s7HJJHexrADEDlT2znPSgTYENQCD"); // 받아오기
+    private String accessKey; // 받아오기
+    private String secretKey; // 받아오기
 
     public boolean getKeys(){
         //id는 나중에
@@ -57,24 +57,21 @@ public class UpbitService implements ApiService {
     //         1              2                  3         4            5              6
     // 순서 : 이름, 보유 수량 중 주문 가능한 수량, 묶여있는 수량, 매수평균가, 매수평균가 수정여부, 평단가 기준 화폐
     @Override
-    public List<List<String>> getAccounts() throws IOException {
-
+    public String getAccounts() throws IOException {
         httpSender.setServerUrl("https://api.upbit.com");
         httpSender.setApiRequest("/v1/accounts");
 
         String responseJson = httpSender.sendApi(accessKey, secretKey);
-        List<List<String>>  result = publicMethod.jsonToList(responseJson);
-        return result;
+        return responseJson;
     }
 
     // 코인 이름 리스트
-    public List<List<String>> getCoinList() {
-        List<List<String>> result = null;
+    public String getCoinList() {
+        String result = "";
         try {
             httpSender.setServerUrl("https://api.upbit.com");
             httpSender.setApiRequest("/v1/market/all?isDetails=false");
-            String list = httpSender.sendApi();
-            result = publicMethod.jsonToList(list);
+            result = httpSender.sendApi();
 
         }catch (IOException e){
             System.out.println(e);
@@ -98,11 +95,12 @@ public class UpbitService implements ApiService {
 
     // 내 모든 코인 가격
     public List<String> getMyCoinPrice() throws IOException, ParseException {
-        List<List<String>> accounts = getAccounts();
+        JSONArray jsonArray = (JSONArray) jsonParser.parse(getAccounts());
         List<String> result = new ArrayList<>();
         String coinPrice = "";
-        for(int i =0; i<accounts.size(); i++){
-            String coinName = accounts.get(i).get(0);
+        for(int i =0; i<jsonArray.size(); i++){
+            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+            String coinName = jsonObject.get("currency").toString();
             if(coinName.equals("KRW")){
                 result.add("0");
                 continue;
@@ -182,13 +180,14 @@ public class UpbitService implements ApiService {
 
     public List<AccountDto> accountDtoMaker() throws IOException, ParseException {
         List<AccountDto> result = new ArrayList<>();
-        List<List<String>> accounts = getAccounts();
+        JSONArray jsonArray = (JSONArray) jsonParser.parse(getAccounts());
         List<String> myCoinPrice = getMyCoinPrice();
-        for (int i = 0; i < accounts.size(); i++) {
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
             AccountDto oneData = null;
-            String coin = accounts.get(i).get(0);
-            double amount = Double.parseDouble(accounts.get(i).get(1)) + Double.parseDouble(accounts.get(i).get(2));
-            double buyPrice = Double.parseDouble(accounts.get(i).get(3));
+            String coin = jsonObject.get("currency").toString();
+            double amount = Double.parseDouble(jsonObject.get("balance").toString()) + Double.parseDouble(jsonObject.get("locked").toString());
+            double buyPrice = Double.parseDouble(jsonObject.get("avg_buy_price").toString());
             double price = Double.parseDouble(myCoinPrice.get(i));
             if (amount == 0) {
                 continue;
@@ -207,7 +206,7 @@ public class UpbitService implements ApiService {
                 oneData = AccountDto.builder()
                         .coinName(coin)
                         .ownAmount(amount)
-                        .sumBuyPrice(Double.parseDouble(accounts.get(i).get(3)) * amount)
+                        .sumBuyPrice(buyPrice * amount)
                         .bigAmount(BigDecimal.valueOf(amount).toPlainString())
                         .buyPrice(buyPrice)
                         .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())

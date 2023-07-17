@@ -7,8 +7,11 @@ import CoinLogger.api.coinone.CoinoneRepository;
 import CoinLogger.api.upbit.Upbit;
 import CoinLogger.api.upbit.UpbitRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -17,6 +20,8 @@ public class AllService {
     private final UpbitRepository upbitRepository;
     private final CoinoneRepository coinoneRepository;
     private final BinanceRepository binanceRepository;
+    private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public void saveKeys(Map<String, String[]> data){
         String[] upbitKey = data.get("upbit");
@@ -54,5 +59,39 @@ public class AllService {
         upbitRepository.save(upbit);
         binanceRepository.save(binance);
         coinoneRepository.save(coinone);
+    }
+
+    public Map<String, ApiDto> getApiKeys(){
+        // id는 나중에
+        String id = "test2222";
+        //
+        Upbit upbit = upbitRepository.findByOwnerId(id);
+        Coinone coinone = coinoneRepository.findByOwnerId(id);
+        Binance binance = binanceRepository.findByOwnerId(id);
+        Map<String, ApiDto> apiMap = new HashMap<>();
+        if(upbit != null){
+            apiMap.put("upbit", new ApiDto(upbit.getAccessKey(), upbit.getSecretKey()));
+        }
+        if(coinone != null){
+            apiMap.put("coinone",new ApiDto(coinone.getAccessKey(), coinone.getSecretKey()));
+        }
+        if(binance != null){
+            apiMap.put("binance",new ApiDto(binance.getAccessKey(), binance.getSecretKey()));
+        }
+        return apiMap;
+    }
+
+    public void saveMember(HttpServletRequest data){
+        System.out.println(data.toString());
+        Member member= new  Member(data.getParameter("memberId"), passwordEncoder.encode(data.getParameter("memberPw")));
+        memberRepository.save(member);
+    }
+
+    public boolean checkDuplicate(Map<String, String> data){
+        if(memberRepository.findByUserId(data.get("memberId")) != null){
+            return true;
+        }else {
+            return false;
+        }
     }
 }

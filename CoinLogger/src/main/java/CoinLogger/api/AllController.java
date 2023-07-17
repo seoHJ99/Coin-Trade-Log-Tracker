@@ -6,13 +6,20 @@ import CoinLogger.api.binance.BinanceService;
 import CoinLogger.api.coinone.CoinoneService;
 import CoinLogger.api.upbit.AccountDto;
 import CoinLogger.api.upbit.LogDto;
+import CoinLogger.api.upbit.Upbit;
 import CoinLogger.api.upbit.UpbitService;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.parser.ParseException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -24,6 +31,7 @@ public class AllController {
     private final CoinoneService coinoneService;
     private final PublicMethod publicMethod;
     private final AllService allService;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/all/account")
     public String getAllAccount(Model model) throws IOException, ParseException {
@@ -31,10 +39,10 @@ public class AllController {
         if(coinoneService.getKeys()){
             allAccount.addAll( coinoneService.accountDtoMaker());
         }
-        if(coinoneService.getKeys()){
+        if(binanceService.getKeys()){
             allAccount.addAll( binanceService.accountDtoMaker());
         }
-        if(coinoneService.getKeys()){
+        if(upbitService.getKeys()){
             allAccount.addAll( upbitService.accountDtoMaker());
         }
         Collections.sort(allAccount, new CoinSumBuyPriceComparator());
@@ -45,11 +53,18 @@ public class AllController {
     }
 
     @GetMapping("/all/all-trade-log")
-    public String getAllLog(Model model) throws NoSuchAlgorithmException {
+    public Object getAllLog(Model model) throws NoSuchAlgorithmException {
         List<LogDto> allLog = new ArrayList<>();
+        List<LogDto> result = new ArrayList<>();
         try {
             if (coinoneService.getKeys()) {
-                allLog.addAll(coinoneService.getAllLog());
+                result = coinoneService.getAllLog();
+                if(result.size() == 1 && result.get(0).getState().contains("error")){
+                    return ResponseEntity.ok("<script>" +
+                            "alert('"+result.get(0).getState() + "');" +
+                            "</script>");
+                }
+                allLog.addAll(result);
             }
             if (binanceService.getKeys()) {
                 allLog.addAll(binanceService.getAllCoinLog());
@@ -67,7 +82,8 @@ public class AllController {
     }
 
     @GetMapping("/myinfo/keys")
-    public String myApiKeys(){
+    public String myApiKeys(Model model){
+        model.addAttribute("keys", allService.getApiKeys());
         return "MyInfo";
     }
 
@@ -76,5 +92,33 @@ public class AllController {
     public String saveKeys(@RequestBody Map<String, String[]> data){
         allService.saveKeys(data);
         return "";
+    }
+
+    @GetMapping("/login")
+    public String loginView(){
+        return "LoginPage";
+    }
+
+    @GetMapping("/join")
+    public String joinForm(){
+        return "joinPage";
+    }
+
+    @PostMapping("/member/join")
+    @ResponseBody
+    public int memberJoin(HttpServletRequest request){ // 원인 불명의 이유로 map형태로 데이터를 못받아옴
+        allService.saveMember(request);
+        return 1;
+    }
+
+    @PostMapping("/id/check")
+    @ResponseBody
+    public int checkDuplicate( Map<String, String> data){
+        boolean duplication = allService.checkDuplicate(data);
+        if(duplication == true){
+            return 0;
+        }else {
+            return 1;
+        }
     }
 }

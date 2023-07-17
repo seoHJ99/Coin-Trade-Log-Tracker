@@ -39,8 +39,8 @@ public class CoinoneService {
     private final PublicMethod publicMethod;
     private final JSONParser jsonParser;
     private final HttpClient httpClient = HttpClientBuilder.create().build();
-    private String ACCESS_TOKEN = "1da9e4b2-11f5-4558-9522-b4f50ca2bb6b";
-    private String SECRET_KEY = "9ef621f6-9bd4-4c1e-96ec-0ffed6f6d1bc";
+    private String ACCESS_TOKEN;
+    private String SECRET_KEY;
     private final ObjectMapper om = new ObjectMapper();
     private final CoinoneRepository coinoneRepository;
 
@@ -86,7 +86,7 @@ public class CoinoneService {
     // 아직 jsonToList 적용 전
     // 내 지갑
     // 1. 주문이 안걸린 잔고  2. 주문이 걸린 잔고   3. 평단가    4. 코인 이름
-    public List<List<String>> getAccounts() throws ParseException {
+    public String getAccounts() throws ParseException {
         String ENDPOINT = "https://api.coinone.co.kr/v2.1/account/balance/all";
         String nonce = UUID.randomUUID().toString();
         Payload payload = new Payload(ACCESS_TOKEN, nonce);
@@ -110,52 +110,59 @@ public class CoinoneService {
         }
         JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
         result = jsonObject.get("balances").toString();
-        return publicMethod.jsonToList(result);
+        return result;
     }
 
     public List<LogDto> getAllLog() throws ParseException {
-        List<List<String>> notDone = getNotDoneOrder();
-        List<List<String>> done = getDoneOrder();
         List<LogDto> result = new ArrayList<>();
-
-        if (!notDone.get(0).isEmpty()) {
+        if(getNotDoneOrder().contains("error:")){
+            LogDto logDto = new LogDto();
+            logDto.setState(getNotDoneOrder());
+            result.add(logDto);
+            return result;
+        }
+        JSONArray notDone = (JSONArray) jsonParser.parse(getNotDoneOrder());
+        JSONArray done = (JSONArray) jsonParser.parse(getDoneOrder());
+        if (!notDone.isEmpty()) {
             for (int i = 0; i < notDone.size(); i++) {
-                Long milliSec = Long.valueOf(notDone.get(i).get(10));
+                JSONObject jsonObject= ((JSONObject)notDone.get(i));
+                Long milliSec = Long.valueOf(jsonObject.get("ordered_at").toString());
                 LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliSec), ZoneId.systemDefault());
                 LogDto oneData = LogDto.builder()
                         .state("waiting")
-                        .orderAmount(notDone.get(i).get(7))
-                        .orderSort(notDone.get(i).get(4))
-                        .remainAmount(notDone.get(i).get(6))
-                        .signedAmount(notDone.get(i).get(9))
-                        .thatTimePrice(notDone.get(i).get(13))
+                        .orderAmount(jsonObject.get("original_qty").toString())
+                        .orderSort(jsonObject.get("side").toString())
+                        .remainAmount(jsonObject.get("remain_qty").toString())
+                        .signedAmount(jsonObject.get("remain_qty").toString())
+                        .thatTimePrice(jsonObject.get("price").toString())
                         .orderTime(time)
-                        .coinName(notDone.get(i).get(3))
+                        .coinName(jsonObject.get("target_currency").toString())
                         .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
                         .build();
                 result.add(oneData);
             }
         }
 
-        if (!done.get(0).isEmpty()) {
+        if (!done.isEmpty()) {
             for (int i = 0; i < done.size(); i++) {
-                Long milliSec = Long.valueOf(done.get(i).get(12));
+                JSONObject jsonObject = (JSONObject)done.get(i);
+                Long milliSec = Long.valueOf(jsonObject.get("timestamp").toString());
                 LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(milliSec), ZoneId.systemDefault());
                 String sort = "";
-                if (done.get(i).get(5).equals("true")) {
+                if (jsonObject.get("is_ask").equals("true")) {
                     sort = "매도";
                 } else {
                     sort = "매수";
                 }
                 LogDto oneData = LogDto.builder()
                         .state("done")
-                        .orderAmount(done.get(i).get(8))
+                        .orderAmount(jsonObject.get("qty").toString())
                         .orderSort(sort)
-                        .coinName(done.get(i).get(0))
+                        .coinName(jsonObject.get("target_currency").toString())
                         .remainAmount("0")
-                        .signedAmount(done.get(i).get(8))
+                        .signedAmount(jsonObject.get("target_currency").toString())
                         .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
-                        .thatTimePrice(done.get(i).get(7))
+                        .thatTimePrice(jsonObject.get("price").toString())
                         .orderTime(time)
                         .build();
                 result.add(oneData);
@@ -168,7 +175,7 @@ public class CoinoneService {
     // 과거 체결 내역 조회                 market : 시장가    limit : 이득으로 걸어둠    limit stop : 손해로 걸어둠
     // 1. 체결 id    2. 주문id   3.마켓 기준 통화(KRW)   4.주문 체결된 코인   5.주문방식??   6. 매도 주문인지   7. 마켓주문여부
     // 8. 체결된 금액  9. 시간    10. 수수료
-    public List<List<String>> getDoneOrder() throws ParseException {
+    public String getDoneOrder() throws ParseException {
         String nonce = UUID.randomUUID().toString();
         String ENDPOINT = "https://api.coinone.co.kr/v2.1/order/completed_orders/all";
 
@@ -192,19 +199,38 @@ public class CoinoneService {
             HttpResponse httpResponse = httpClient.execute(httpPost);
 
             result = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
-        result = jsonObject.get("completed_orders").toString();
-        return publicMethod.jsonToList(result);
+        try {
+            result = jsonObject.get("completed_orders").toString();
+
+        }catch (NullPointerException e) {
+            Object error_code = jsonObject.get("error_code");
+            if (error_code.equals("4")) {
+                e.printStackTrace();
+                return ("코인원 error:제한된 사용자입니다.");
+            } else if (error_code.equals("12")) {
+                e.printStackTrace();
+                return ("코인원 error:api key의 값이 옳지 않습니다.");
+            } else if (error_code.equals("40")) {
+                e.printStackTrace();
+                return ("코인원 error:승인되지 않은 api입니다.");
+            } else if (error_code.equals("107")) {
+                e.printStackTrace();
+                return ("코인원 error:파라미터 에러입니다.");
+            } else {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 
     // 미체결 주문
     // 1. 주문  2. 주문 방식  3. 기준통화  4. 코인 이름  5. 매수/매도  6. 주문금액  7. 남은 수량  8. 최초 주문 수량  9. 취소 수량
     // 10. 체결 수량  11. 시간  12. 수수료  13. 수수료율  14. 체결 주문 평단가
-    public List<List<String>> getNotDoneOrder() throws ParseException {
+    public String getNotDoneOrder() throws ParseException {
         String nonce = UUID.randomUUID().toString();
         String ENDPOINT = "https://api.coinone.co.kr/v2.1/order/open_orders/all";
         Payload payload = new Payload(ACCESS_TOKEN, nonce);
@@ -231,22 +257,24 @@ public class CoinoneService {
         } catch (NullPointerException e) {
             Object error_code = jsonObject.get("error_code");
             if (error_code.equals("4")) {
-                System.out.println("제한된 사용자입니다.");
-
-            } else if (error_code.equals("11")) {
-                System.out.println("엑세스 토큰이 존재하지 않습니다.");
+                e.printStackTrace();
+                return ("코인원 error:제한된 사용자입니다.");
+            } else if (error_code.equals("12")) {
+                e.printStackTrace();
+                return ("코인원 error:api key의 값이 옳지 않습니다.");
             } else if (error_code.equals("40")) {
-                throw new CustomException("승인되지 않은 api입니다.");
+                e.printStackTrace();
+                return ("코인원 error:승인되지 않은 api입니다.");
             } else if (error_code.equals("107")) {
-                throw new CustomException("파라미터 에러입니다.");
+                e.printStackTrace();
+                return ("코인원 error:파라미터 에러입니다.");
             } else {
                 e.printStackTrace();
             }
-            return ;
         }
-
-        return publicMethod.jsonToList(result);
+        return result;
     }
+
 
     // 내 코인 현재 가격 정보 가져오기
     public Map<String, String> getMyCoinPrice() throws ParseException {
@@ -299,13 +327,14 @@ public class CoinoneService {
 
     public List<AccountDto> accountDtoMaker() throws ParseException {
         List<AccountDto> result = new ArrayList<>();
-        List<List<String>> accounts = getAccounts();
+        JSONArray jsonArray = (JSONArray) jsonParser.parse( getAccounts());
         Map<String, String> coinMap = getMyCoinPrice();
-        for (int i = 0; i < accounts.size(); i++) {
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
             AccountDto oneData = null;
-            String coin = accounts.get(i).get(3);
-            double amount = Double.valueOf(accounts.get(i).get(0)) + Double.valueOf(accounts.get(i).get(1));
-            double buyPrice = Double.parseDouble(accounts.get(i).get(2));
+            String coin = jsonObject.get("currency").toString();
+            double amount = Double.parseDouble(jsonObject.get("available").toString()) + Double.parseDouble(jsonObject.get("limit").toString());
+            double buyPrice = Double.parseDouble(jsonObject.get("average_price").toString());
             if (amount == 0) {
                 continue;
             }

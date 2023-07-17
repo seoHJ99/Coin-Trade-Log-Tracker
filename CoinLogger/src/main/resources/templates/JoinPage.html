@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>회원가입</title>
+    <style>
+      main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 200px;
+      }
+      input {
+        margin: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>회원가입</h1>
+      <input type="text" class="memberId" placeholder="아이디를 입력하세요" />
+      <input type="button" class="check" value="중복 확인" />
+      <input type="text" class="memberPw" placeholder="비밀번호를 입력하세요" />
+      <input type="button" class="submit" value="회원가입" />
+    </main>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script>
+      $(".check").on("click", function () {
+        $.ajax({
+          type: "POST",
+          async: false,
+          traditional: false,
+          url: "/id/check",
+          dataType: "text",
+          data: {
+            memberId: $(".memberId").val(),
+          },
+          error: function (e) {
+            alert("중복된 id입니다.");
+          },
+          success: function (response) {
+            if (response == 1) {
+              alert("사용 가능한 id입니다.");
+            }
+          },
+        });
+      });
+
+      $(".submit").on("click", function () {
+        $.ajax({
+          type: "POST",
+          async: false,
+          traditional: false,
+          url: "/member/join",
+          dataType: "text",
+          data: {
+            memberId: $(".memberId").val(),
+            memberPw: $(".memberPw").val(),
+          },
+          error: function (e) {
+            alert("오류 발생");
+          },
+          success: function (response) {
+            if (response == 1) {
+              location.href = "/login";
+            }
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

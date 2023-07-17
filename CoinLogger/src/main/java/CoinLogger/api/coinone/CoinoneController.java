@@ -2,11 +2,14 @@ package CoinLogger.api.coinone;
 
 import CoinLogger.PublicMethod;
 import CoinLogger.api.upbit.AccountDto;
+import CoinLogger.api.upbit.LogDto;
 import lombok.*;
 import org.json.simple.parser.ParseException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.*;
 
@@ -46,12 +49,19 @@ public class CoinoneController {
     }
 
     @GetMapping("/coinone/all-trade-log")
-    public String getLog(Model model) throws ParseException {
-//        if(coinoneService.getKeys()) {
-            model.addAttribute("log", coinoneService.getAllLog());
-//        }else {
-//            model.addAttribute("log", null);
-//        }
+    public Object getLog(Model model) throws ParseException {
+        if(coinoneService.getKeys()) {
+            List<LogDto> result = coinoneService.getAllLog();
+            if(result.size() == 1 && result.get(0).getState().contains("error")){
+                return ResponseEntity.ok("<script>" +
+                        "alert('"+result.get(0).getState() + "');" +
+                        "history.back();" +
+                        "</script>");
+            }
+            model.addAttribute("log", result);
+        }else {
+            model.addAttribute("log", null);
+        }
         return "LogListPage";
     }
 }

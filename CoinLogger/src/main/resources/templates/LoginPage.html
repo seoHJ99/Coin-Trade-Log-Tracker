@@ -16,6 +16,9 @@
         justify-content: center;
         align-items: center;
       }
+      .main {
+        margin-bottom: 500px;
+      }
       .login_box {
         width: 300px;
         display: flex;
@@ -36,6 +39,10 @@
       .button {
         margin: 5px;
       }
+      .submit {
+        width: 100%;
+      }
+
       .find_button {
         display: flex;
       }
@@ -56,19 +63,34 @@
       <div class="header"></div>
       <div class="main">
         <div class="login_box">
-          <div class="login_text">로그인</div>
-          <div>
-            <input type="text" class="input_box" />
-            <br />
-            <input type="password" class="input_box" />
-          </div>
-          <input type="button" class="submit button" value="로그인" />
-          <div class="find_button">
-            <input type="button" class="find_id button" value="아이디 찾기" />
-            <input type="button" class="find_pw button" value="비빌번호 찾기" />
-          </div>
+          <form action="/loginAction" method="post">
+            <div class="login_text">로그인</div>
+            <div>
+              <input type="text" class="input_box" name="userId" />
+              <br />
+              <input type="password" class="input_box" name="password" />
+            </div>
+            <input type="submit" class="submit button" value="로그인" />
+            <div class="find_button">
+              <input type="button" class="find_id button" value="아이디 찾기" />
+              <input
+                type="button"
+                class="find_pw button"
+                value="비빌번호 찾기"
+              />
+            </div>
+            <div>
+              <input
+                type="button"
+                value="회원가입"
+                onclick="location.href='/join';"
+              />
+            </div>
+          </form>
         </div>
       </div>
     </div>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script></script>
   </body>
 </html>

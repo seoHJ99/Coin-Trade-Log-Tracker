@@ -18,7 +18,7 @@
         margin: 0 250px;
       }
       .header {
-        width: 100%;
+        width: 1100px;
         height: 200px;
         display: flex;
         justify-content: center;
@@ -108,6 +108,7 @@
               placeholder="엑세스 키"
               readonly
               class="first_input upbit"
+              th:value="${keys['upbit'].accessKey}"
             />
           </div>
           <div class="key_row">
@@ -117,6 +118,7 @@
               placeholder="시크릿 키"
               readonly
               class="second_input upbit"
+              th:value="${keys['upbit'].secretKey}"
             />
           </div>
         </div>
@@ -132,6 +134,7 @@
               placeholder="엑세스 키"
               readonly
               class="first_input coinone"
+              th:value="${keys['coinone'].accessKey}"
             />
           </div>
           <div class="key_row">
@@ -141,6 +144,7 @@
               placeholder="시크릿 키"
               readonly
               class="second_input coinone"
+              th:value="${keys['coinone'].secretKey}"
             />
           </div>
         </div>
@@ -156,6 +160,7 @@
               placeholder="엑세스 키"
               readonly
               class="first_input binance"
+              th:value="${keys['binance'].accessKey}"
             />
           </div>
           <div class="key_row">
@@ -165,6 +170,7 @@
               placeholder="시크릿 키"
               readonly
               class="second_input binance"
+              th:value="${keys['binance'].secretKey}"
             />
           </div>
         </div>
@@ -231,7 +237,7 @@
             alert("오류 발생");
           },
           success: function (e) {
-            // location.href = location.href;
+            location.href = location.href;
           },
         });
       }

@@ -31,8 +31,8 @@ public class BinanceService {
 
     private final BinanceRepository binanceRepository;
     private double oneDollarWon;
-    String secretKey = "o3qjLnuwzNFkh2RQRr8wRCpR8pYqMC1Dt7fF1B9T6xggn73ksNAQSmBUTeeRzpUL";
-    String accessKey = "lTJrdh5xuwUhaeUiYHNP3pMYP7MEPKoDM3h9L4Ka6jy7VZiBlKXPbHKNDh7UuFME";
+    String secretKey;
+    String accessKey;
     String serverUrl = "https://api.binance.com";
     int plusTime = 0;
 
@@ -154,7 +154,7 @@ public class BinanceService {
     }
 
 
-    public List<List<String>> getAccountCoin() throws IOException, ParseException {
+    public String getAccountCoin() throws IOException {
 
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
@@ -170,7 +170,6 @@ public class BinanceService {
 
         HttpResponse response = httpClient.execute(request);
         HttpEntity entity = response.getEntity();
-        ;
         String entityString = EntityUtils.toString(entity, "UTF-8");
 
         if (entityString.contains("-1021")) {
@@ -181,11 +180,10 @@ public class BinanceService {
             plusTime += 1000;
             return getAccountCoin();
         }
-        List<List<String>> result = publicMethod.jsonToList(entityString);
-        return result;
+        return entityString;
     }
 
-    public List<String> getMyCoinName() throws IOException {
+    public List<String> getMyCoinName() throws IOException, ParseException {
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
 
         String timestamp = Long.toString(System.currentTimeMillis() + plusTime);
@@ -212,10 +210,11 @@ public class BinanceService {
             return getMyCoinName();
         }
 
-        List<List<String>> result = publicMethod.jsonToList(entityString);
+        JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
         List<String> coinNames = new ArrayList<>();
-        for (int i = 0; i < result.size(); i++) {
-            coinNames.add(result.get(i).get(0));
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject jsonObject = (JSONObject)jsonArray.get(i);
+            coinNames.add(jsonObject.get("asset").toString());
         }
         return coinNames;
     }
@@ -298,21 +297,22 @@ public class BinanceService {
     }
 
     public List<AccountDto> accountDtoMaker() throws IOException, ParseException {
-        List<List<String>> myCoin = getAccountCoin();
+        JSONArray jsonArray = (JSONArray) jsonParser.parse(getAccountCoin());
         // id
         String id = "test2222";
         //
         getDollar();
         double sumNowPriceWon;
         List<AccountDto> dtoList = new ArrayList<>();
-        for (int i = 0; i < myCoin.size(); i++) {
-            String coinName = myCoin.get(i).get(0);
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+            String coinName = jsonObject.get("asset").toString();
             MemberCoin entity = memberCoinListRepository.findByCoinNameAndId(coinName, id);
-            double coinPrice = getCoinPrice(myCoin.get(i).get(0));
-            double coinAmount = Double.parseDouble(myCoin.get(i).get(1));
+            double coinPrice = getCoinPrice(coinName);
+            double coinAmount = Double.parseDouble(jsonObject.get("free").toString());
             sumNowPriceWon = coinPrice * oneDollarWon * coinAmount;
             AccountDto dto = AccountDto.builder()
-                    .coinName(myCoin.get(i).get(0))
+                    .coinName(coinName)
                     .bigAmount(""+BigDecimal.valueOf(coinAmount))
                     .bigNow(BigDecimal.valueOf(coinPrice * oneDollarWon) + "")
                     .nowPrice(coinPrice * oneDollarWon)

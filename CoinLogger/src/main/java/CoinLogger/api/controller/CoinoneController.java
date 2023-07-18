@@ -31,7 +31,7 @@ public class CoinoneController {
             model.addAttribute("data", null);
             model.addAttribute("secondData", null);
         }
-      return "AccountsListPage";
+      return "/AccountsListPage";
     }
 
     @GetMapping("/coinone/all-trade-log")
@@ -48,6 +48,6 @@ public class CoinoneController {
         }else {
             model.addAttribute("log", null);
         }
-        return "LogListPage";
+        return "/LogListPage";
     }
 }

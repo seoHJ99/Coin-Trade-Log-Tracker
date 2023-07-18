@@ -31,7 +31,7 @@ public class UpbitController {
             model.addAttribute("data", null);
             model.addAttribute("secondData", null);
         }
-        return "AccountsListPage";
+        return "/AccountsListPage";
     }
 
     @GetMapping("upbit/all-trade-log")
@@ -41,6 +41,6 @@ public class UpbitController {
         }else {
             model.addAttribute("log", null);
         }
-         return "LogListPage";
+         return "/LogListPage";
     }
 }

@@ -32,7 +32,7 @@ public class BinanceController {
             model.addAttribute("secondData", null);
         }
 
-        return "AccountsListPage";
+        return "/AccountsListPage";
     }
 
     @GetMapping("/binance/wallet")
@@ -43,7 +43,7 @@ public class BinanceController {
         }else {
             model.addAttribute("coinName", null);
         }
-        return "binanceCoin";
+        return "/binanceCoin";
     }
 
     @GetMapping("/binance/all-trade-log")
@@ -53,7 +53,7 @@ public class BinanceController {
         }else {
             model.addAttribute("log", null);
         }
-        return "LogListPage";
+        return "/LogListPage";
     }
 
     @PostMapping("/test")

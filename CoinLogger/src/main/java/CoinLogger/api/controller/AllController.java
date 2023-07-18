@@ -48,7 +48,7 @@ public class AllController {
         Map<String, String> secondData = publicMethod.makeSumData(allAccount);
         model.addAttribute("data", allAccount);
         model.addAttribute("secondData", secondData);
-        return "AccountsListPage";
+        return "/AccountsListPage";
     }
 
     @GetMapping("/all/all-trade-log")
@@ -77,13 +77,13 @@ public class AllController {
             System.out.println("Json 파싱 오류");
         }
         model.addAttribute("log", allLog);
-        return "LogListPage";
+        return "/LogListPage";
     }
 
     @GetMapping("/myinfo/keys")
     public String myApiKeys(Model model){
         model.addAttribute("keys", allService.getApiKeys());
-        return "MyInfo";
+        return "/MyInfo";
     }
 
     @PostMapping("/api/key")
@@ -97,7 +97,7 @@ public class AllController {
     private HttpServletRequest request;
     @GetMapping("/login")
     public String loginView(){
-        return "LoginPage";
+        return "/LoginPage";
     }
 
     @GetMapping("/join")

@@ -102,7 +102,7 @@ public class AllController {
 
     @GetMapping("/join")
     public String joinForm(){
-        return "joinPage";
+        return "JoinPage";
     }
 
     @PostMapping("/member/join")

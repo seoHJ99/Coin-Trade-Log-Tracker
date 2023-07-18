@@ -72,6 +72,10 @@ public class AllService {
         Coinone coinone = coinoneRepository.findByOwnerId(id);
         Binance binance = binanceRepository.findByOwnerId(id);
         Map<String, ApiDto> apiMap = new HashMap<>();
+        ApiDto apiDto = new ApiDto("","");
+        apiMap.put("upbit", apiDto);
+        apiMap.put("coinone", apiDto);
+        apiMap.put("binance", apiDto);
         if(upbit != null){
             apiMap.put("upbit", new ApiDto(upbit.getAccessKey(), upbit.getSecretKey()));
         }

@@ -218,11 +218,11 @@
           </div>
           <div class="list">
             <table class="seperate">
-              <tr th:if="${log}" th:each="log : ${log}">
+              <tr class="row" th:if="${log}" th:each="log : ${log}">
                 <td th:text="${ log.orderTime }">더미</td>
                 <td class="sort" th:text="${ log.orderSort }">더미</td>
                 <td th:text="${ log.coinName }">더미</td>
-                <td th:text="${log.thatTimePrice + '원' }">더미</td>
+                <td class="won" th:text="${log.thatTimePrice + '원' }">더미</td>
                 <td th:text="${ log.orderAmount }">더미</td>
                 <td th:text="${ log.signedAmount }">더미</td>
                 <!-- <td th:text="${ log.remainAmount }">더미</td> -->
@@ -240,6 +240,13 @@
     </div>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script>
+      $(".won").each(function (index, item) {
+        if (
+          $(".trader").eq(index).attr("src").includes("data:image/png;base64")
+        ) {
+          $(item).text($(item).text().replace("원", "달러"));
+        }
+      });
       $(".sort").each(function () {
         if ($(this).text() == "매도") {
           $(this).css("background-color", "blue");

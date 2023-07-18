@@ -50,6 +50,7 @@ public class BinanceController {
     public String getLog(Model model) throws ParseException, IOException {
         if(binanceService.getKeys()) {
             model.addAttribute("log", binanceService.getAllCoinLog());
+            model.addAttribute("binance");
         }else {
             model.addAttribute("log", null);
         }

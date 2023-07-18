@@ -45,7 +45,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true)
                 .logoutSuccessUrl("/login");
     }
-
     //BCrypt 암호화 엔코더 빈 생성
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -1,6 +1,7 @@
 package CoinLogger.api.controller;
 
 import CoinLogger.api.comparator.CoinSumBuyPriceComparator;
+import CoinLogger.api.comparator.LogTimeComparator;
 import CoinLogger.api.other.PublicMethod;
 import CoinLogger.api.service.AllService;
 import CoinLogger.api.service.BinanceService;
@@ -71,6 +72,7 @@ public class AllController {
             if (upbitService.getKeys()) {
                 allLog.addAll(upbitService.makeLogList());
             }
+            Collections.sort(allLog, new LogTimeComparator());
         }catch (IOException ioException){
             System.out.println("통신오류");
         } catch (ParseException parseException){

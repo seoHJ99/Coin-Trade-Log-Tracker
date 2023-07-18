@@ -37,7 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(((request, response, authentication) -> {
                     request.getSession().setAttribute("userId", request.getParameter("userId"));
                     response.sendRedirect("/all/account");
-
+                    System.out.println(request.getSession().getAttribute("userId"));
                 }))
                 .and()
            .logout()

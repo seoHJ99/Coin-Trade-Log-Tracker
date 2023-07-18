@@ -64,7 +64,7 @@ public class UpbitService {
         httpSender.setServerUrl("https://api.upbit.com");
         httpSender.setApiRequest("/v1/accounts");
         String responseJson = httpSender.sendApi(accessKey, secretKey);
-        System.out.println(responseJson);
+        System.out.println("aaaaaaaaaaaaaaa"+responseJson);
         return responseJson;
     }
 

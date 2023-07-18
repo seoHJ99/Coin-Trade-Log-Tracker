@@ -292,6 +292,9 @@
       let link = document.location.href;
       if (link.includes("binance")) {
         $("#binance").prop("checked", "true");
+        let tag =
+          "<div><p style='color:red'>바이낸스의 거래기록의 단위는 USDT입니다.</p></div>";
+        $(".nav").before(tag);
       } else if (link.includes("upbit")) {
         $("#upbit").prop("checked", "true");
       } else if (link.includes("coinone")) {

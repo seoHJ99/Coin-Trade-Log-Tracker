@@ -16,10 +16,16 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Configuration
 public class BeanConfig {
+
+    @Bean
+    public DateTimeFormatter formatter(){
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    }
 
     @Bean
     public HttpClient httpClient (){

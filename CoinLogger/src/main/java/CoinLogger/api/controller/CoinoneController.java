@@ -23,7 +23,7 @@ public class CoinoneController {
     @GetMapping("/coinone/account")
     public String getAccount(Model model) throws ParseException {
         if(coinoneService.getKeys()) {
-            List<AccountDto> dtoList = coinoneService.accountDtoMaker();
+            List<AccountDto> dtoList = coinoneService.getAccountList();
             Map<String, String> secondData = publicMethod.makeSumData(dtoList);
             model.addAttribute("data", dtoList);
             model.addAttribute("secondData", secondData);
@@ -37,7 +37,7 @@ public class CoinoneController {
     @GetMapping("/coinone/all-trade-log")
     public Object getLog(Model model) throws ParseException {
         if(coinoneService.getKeys()) {
-            List<LogDto> result = coinoneService.getAllLog();
+            List<LogDto> result = coinoneService.getAllLogDto();
             if(result.size() == 1 && result.get(0).getState().contains("error")){
                 return ResponseEntity.ok("<script>" +
                         "alert('"+result.get(0).getState() + "');" +

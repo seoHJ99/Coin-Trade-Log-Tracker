@@ -28,8 +28,6 @@ public class LogDto {
     public  LogDto (JSONObject jsonObject, double dollar ) {
         Instant instant = Instant.ofEpochMilli((Long) jsonObject.get("time")); // 밀리초를 Instant으로 변환
         LocalDateTime localDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-        // Format LocalDateTime to "yyyy-MM-dd'T'HH:mm:ss" format
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         String formattedDateTime = localDateTime.format(formatter);
         LocalDateTime orderTime = LocalDateTime.parse(formattedDateTime, formatter);

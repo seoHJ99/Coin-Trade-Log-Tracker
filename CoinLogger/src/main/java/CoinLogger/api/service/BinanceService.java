@@ -31,7 +31,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class BinanceService {
+public class BinanceService implements ApiServiceInter {
     private final HttpClient httpClient;
     private final JSONParser jsonParser;
     private final PublicMethod publicMethod;
@@ -229,7 +229,8 @@ public class BinanceService {
         return coinNames;
     }
 
-    public List<LogDto> getAllCoinLog() throws IOException, ParseException {
+    @Override
+    public List<LogDto> getAllLogDto() throws IOException, ParseException {
         List<String> coinNames = getMyCoinName();
         getDollar();
         List<LogDto> logList = new ArrayList<>();
@@ -305,7 +306,8 @@ public class BinanceService {
         return secondData;
     }
 
-    public List<AccountDto> accountDtoMaker() throws IOException, ParseException {
+    @Override
+    public List<AccountDto> getAccountList() throws IOException, ParseException {
         JSONArray jsonArray = (JSONArray) jsonParser.parse(getAccountCoin());
         String id = request.getSession().getAttribute("userId").toString();
         getDollar();

@@ -2,7 +2,6 @@ package CoinLogger.api.service;
 
 
 import CoinLogger.api.comparator.CoinSumBuyPriceComparator;
-import CoinLogger.api.other.PublicMethod;
 import CoinLogger.api.other.HttpSender;
 import CoinLogger.api.entity.Upbit;
 import CoinLogger.api.entity.UpbitRepository;
@@ -36,11 +35,11 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class UpbitService {
+public class UpbitService implements ApiServiceInter {
     private final HttpClient httpClient;
     private final JSONParser jsonParser;
     private final HttpSender httpSender;
-    private final PublicMethod publicMethod;
+    private DateTimeFormatter formatter;
     private final UpbitRepository upbitRepository;
     private String accessKey; // 받아오기
     private String secretKey; // 받아오기
@@ -64,7 +63,6 @@ public class UpbitService {
         httpSender.setServerUrl("https://api.upbit.com");
         httpSender.setApiRequest("/v1/accounts");
         String responseJson = httpSender.sendApi(accessKey, secretKey);
-        System.out.println("aaaaaaaaaaaaaaa"+responseJson);
         return responseJson;
     }
 
@@ -123,46 +121,45 @@ public class UpbitService {
 
 
     // 주문 내역 가져오기( 체결, 취소 )
-    public String getOrders() throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
-        String serverUrl = ("https://api.upbit.com");
-
-        ArrayList<String> queryElements = new ArrayList<>();
-
-        queryElements.add("states[]=done,cancel" );
-
-        String queryString = String.join("&", queryElements.toArray(new String[0]));
-
-        MessageDigest md = MessageDigest.getInstance("SHA-512");
-        md.update(queryString.getBytes("UTF-8"));
-
-        String queryHash = String.format("%0128x", new BigInteger(1, md.digest()));
-
-        Algorithm algorithm = Algorithm.HMAC256(secretKey);
-        String jwtToken = JWT.create()
-                .withClaim("access_key", accessKey)
-                .withClaim("nonce", UUID.randomUUID().toString())
-                .withClaim("query_hash", queryHash)
-                .withClaim("query_hash_alg", "SHA512")
-                .sign(algorithm);
-
-        String authenticationToken = "Bearer " + jwtToken;
+    public String getOrders() throws UnsupportedEncodingException {
         String result = null;
         try {
+            String serverUrl = ("https://api.upbit.com");
+
+            ArrayList<String> queryElements = new ArrayList<>();
+
+            queryElements.add("states[]=done,cancel");
+
+            String queryString = String.join("&", queryElements.toArray(new String[0]));
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            md.update(queryString.getBytes("UTF-8"));
+
+            String queryHash = String.format("%0128x", new BigInteger(1, md.digest()));
+
+            Algorithm algorithm = Algorithm.HMAC256(secretKey);
+            String jwtToken = JWT.create()
+                    .withClaim("access_key", accessKey)
+                    .withClaim("nonce", UUID.randomUUID().toString())
+                    .withClaim("query_hash", queryHash)
+                    .withClaim("query_hash_alg", "SHA512")
+                    .sign(algorithm);
+            String authenticationToken = "Bearer " + jwtToken;
             HttpGet request = new HttpGet(serverUrl + "/v1/orders?" + queryString);
             request.setHeader("Content-Type", "application/json");
             request.addHeader("Authorization", authenticationToken);
             HttpResponse response = httpClient.execute(request);
             HttpEntity entity = response.getEntity();
             result = EntityUtils.toString(entity, "UTF-8");
-        } catch (IOException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
+            return "0";
         }
         return result;
     }
 
 
-    public List<AccountDto> accountDtoMaker() throws IOException, ParseException {
+    @Override
+    public List<AccountDto> getAccountList() throws IOException, ParseException {
         List<AccountDto> result = new ArrayList<>();
         JSONArray jsonArray = (JSONArray) jsonParser.parse(getAccounts());
         List<String> myCoinPrice = getMyCoinPrice();
@@ -209,11 +206,17 @@ public class UpbitService {
         return result;
     }
 
-    public List<LogDto> makeLogList() throws UnsupportedEncodingException, NoSuchAlgorithmException, ParseException {
+    @Override
+    public List<LogDto> getAllLogDto() throws UnsupportedEncodingException, ParseException {
         List<LogDto> logList = new ArrayList<>();
         String allLog = getOrders();
+        if(allLog.equals("0")){
+            LogDto logDto = new LogDto();
+            logDto.setState("error: 개발자에게 연락하세요.");
+            logList.add(logDto);
+            return logList;
+        }
         String[] a = allLog.replaceAll("\\[","").replaceAll("]","").split("},");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
         for(int i =0; i<a.length; i++){
             if(i < a.length-1){
                 a[i] = a[i] + "}";

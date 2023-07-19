@@ -37,9 +37,8 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class CoinoneService {
+public class CoinoneService implements ApiServiceInter{
 
-    private final PublicMethod publicMethod;
     private final JSONParser jsonParser;
     private final HttpClient httpClient = HttpClientBuilder.create().build();
     private String ACCESS_TOKEN;
@@ -115,7 +114,8 @@ public class CoinoneService {
         return result;
     }
 
-    public List<LogDto> getAllLog() throws ParseException {
+    @Override
+    public List<LogDto> getAllLogDto() throws ParseException {
         List<LogDto> result = new ArrayList<>();
         if(getNotDoneOrder().contains("error:")){
             LogDto logDto = new LogDto();
@@ -322,7 +322,8 @@ public class CoinoneService {
         }
     }
 
-    public List<AccountDto> accountDtoMaker() throws ParseException {
+    @Override
+    public List<AccountDto> getAccountList() throws ParseException {
         List<AccountDto> result = new ArrayList<>();
         JSONArray jsonArray = (JSONArray) jsonParser.parse( getAccounts());
         Map<String, String> coinMap = getMyCoinPrice();

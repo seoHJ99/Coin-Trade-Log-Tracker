@@ -31,19 +31,28 @@ public class AllController {
     private final CoinoneService coinoneService;
     private final PublicMethod publicMethod;
     private final AllService allService;
-    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/all/account")
-    public String getAllAccount(Model model) throws IOException, ParseException {
+    public Object getAllAccount(Model model) {
         List<AccountDto> allAccount = new ArrayList<>();
-        if(coinoneService.getKeys()){
-            allAccount.addAll( coinoneService.accountDtoMaker());
-        }
-        if(binanceService.getKeys()){
-            allAccount.addAll( binanceService.accountDtoMaker());
-        }
-        if(upbitService.getKeys()){
-            allAccount.addAll( upbitService.accountDtoMaker());
+        try {
+            if (coinoneService.getKeys()) {
+                allAccount.addAll(coinoneService.getAccountList());
+            }
+            if (binanceService.getKeys()) {
+                allAccount.addAll(binanceService.getAccountList());
+            }
+            if (upbitService.getKeys()) {
+                allAccount.addAll(upbitService.getAccountList());
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+            System.out.println("통신 오류");
+            return ResponseEntity.ok("<script>alert('error: 통신오류!<br/> 개발자에게 연락하세요')</script>");
+        }catch (ParseException e){
+            e.printStackTrace();
+            System.out.println("파싱 오류");
+            return ResponseEntity.ok("<script>alert('error: 파싱오류!<br/> 개발자에게 연락하세요')</script>");
         }
         Collections.sort(allAccount, new CoinSumBuyPriceComparator());
         Map<String, String> secondData = publicMethod.makeSumData(allAccount);
@@ -53,12 +62,12 @@ public class AllController {
     }
 
     @GetMapping("/all/all-trade-log")
-    public Object getAllLog(Model model) throws NoSuchAlgorithmException {
+    public Object getAllLog(Model model)  {
         List<LogDto> allLog = new ArrayList<>();
         List<LogDto> result = new ArrayList<>();
         try {
             if (coinoneService.getKeys()) {
-                result = coinoneService.getAllLog();
+                result = coinoneService.getAllLogDto();
                 if(result.size() == 1 && result.get(0).getState().contains("error")){
                     return ResponseEntity.ok("<script>" +
                             "alert('"+result.get(0).getState() + "');" +
@@ -67,16 +76,25 @@ public class AllController {
                 allLog.addAll(result);
             }
             if (binanceService.getKeys()) {
-                allLog.addAll(binanceService.getAllCoinLog());
+                allLog.addAll(binanceService.getAllLogDto());
             }
             if (upbitService.getKeys()) {
-                allLog.addAll(upbitService.makeLogList());
+                List<LogDto> allLogDto = upbitService.getAllLogDto();
+                if(allLogDto.size() == 1 && allLogDto.get(0).getState().contains("error")){
+                    return ResponseEntity.ok("<script>" +
+                            "alert('"+allLogDto.get(0).getState() + "');" +
+                            "</script>");
+                }else {
+                    model.addAttribute("log", allLogDto);
+                }
             }
             Collections.sort(allLog, new LogTimeComparator());
         }catch (IOException ioException){
             System.out.println("통신오류");
+            return ResponseEntity.ok("<script>alert('error: 통신오류!<br/> 개발자에게 연락하세요')</script>");
         } catch (ParseException parseException){
             System.out.println("Json 파싱 오류");
+            return ResponseEntity.ok("<script>alert('error: 파싱오류!<br/> 개발자에게 연락하세요')</script>");
         }
         model.addAttribute("log", allLog);
         return "LogListPage";
@@ -95,8 +113,6 @@ public class AllController {
         return "";
     }
 
-    @Autowired
-    private HttpServletRequest request;
     @GetMapping("/login")
     public String loginView(){
         return "LoginPage";

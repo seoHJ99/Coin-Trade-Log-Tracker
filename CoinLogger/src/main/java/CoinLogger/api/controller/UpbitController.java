@@ -2,10 +2,12 @@ package CoinLogger.api.controller;
 
 
 import CoinLogger.api.dto.AccountDto;
+import CoinLogger.api.dto.LogDto;
 import CoinLogger.api.other.PublicMethod;
 import CoinLogger.api.service.UpbitService;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.parser.ParseException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +25,7 @@ public class UpbitController {
     @GetMapping("/upbit/account")
     public String getAllAccounts(Model model) throws IOException, ParseException {
         if(upbit.getKeys()) {
-            List<AccountDto> dtoList = upbit.accountDtoMaker();
+            List<AccountDto> dtoList = upbit.getAccountList();
             Map<String, String> secondData = publicMethod.makeSumData(dtoList);
             model.addAttribute("data", dtoList);
             model.addAttribute("secondData", secondData);
@@ -35,9 +37,16 @@ public class UpbitController {
     }
 
     @GetMapping("upbit/all-trade-log")
-    public String getTradeLog(Model model) throws UnsupportedEncodingException, NoSuchAlgorithmException, ParseException {
+    public Object getTradeLog(Model model) throws UnsupportedEncodingException, NoSuchAlgorithmException, ParseException {
         if(upbit.getKeys()) {
-            model.addAttribute("log", upbit.makeLogList());
+            List<LogDto> allLogDto = upbit.getAllLogDto();
+            if(allLogDto.size() == 1 && allLogDto.get(0).getState().contains("error")){
+                return ResponseEntity.ok("<script>" +
+                        "alert('"+allLogDto.get(0).getState() + "');" +
+                        "</script>");
+            }else {
+                model.addAttribute("log", allLogDto);
+            }
         }else {
             model.addAttribute("log", null);
         }

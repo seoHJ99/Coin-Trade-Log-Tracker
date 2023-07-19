@@ -11,6 +11,7 @@ import CoinLogger.api.entity.MemberCoinListRepository;
 import CoinLogger.api.dto.AccountDto;
 import CoinLogger.api.dto.LogDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -47,14 +48,14 @@ public class BinanceService implements ApiServiceInter {
     @Autowired
     private HttpServletRequest request;
 
-    public boolean getKeys(){
+    public boolean getKeys() {
         String id = request.getSession().getAttribute("userId").toString();
         Binance binance = binanceRepository.findByOwnerId(id);
-        if(binance != null) {
+        if (binance != null) {
             secretKey = binance.getSecretKey();
             accessKey = binance.getAccessKey();
             return true;
-        }else {
+        } else {
             return false;
         }
     }
@@ -93,17 +94,17 @@ public class BinanceService implements ApiServiceInter {
             JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
             String id = request.getSession().getAttribute("userId").toString();
             String coinName = "";
-            for(int i =0; i<jsonArray.size(); i++){
-                coinName = ((JSONObject)jsonArray.get(i)).get("symbol").toString().replaceAll("USDT","");
+            for (int i = 0; i < jsonArray.size(); i++) {
+                coinName = ((JSONObject) jsonArray.get(i)).get("symbol").toString().replaceAll("USDT", "");
             }
             MemberCoin dbCoin = memberCoinListRepository.findByCoinNameAndId(coinName, id);
-            if(dbCoin == null){
+            if (dbCoin == null) {
                 double amount = 0;
                 double avgPrice = 0;
                 long milliTime = 0;
-                for(int i =0; i < jsonArray.size(); i++){
+                for (int i = 0; i < jsonArray.size(); i++) {
                     JSONObject jsonObject = ((JSONObject) jsonArray.get(i));
-                    if(jsonObject.get("side").equals("BUY")){
+                    if (jsonObject.get("side").equals("BUY")) {
                         double buyAmount = Double.parseDouble(jsonObject.get("executedQty").toString());
                         double buyPrice = Double.parseDouble(jsonObject.get("price").toString());
                         avgPrice = ((avgPrice * amount) + (buyAmount * buyPrice)) / (amount + buyAmount);
@@ -112,33 +113,33 @@ public class BinanceService implements ApiServiceInter {
                     } else if (jsonObject.get("side").equals("SELL")) {
                         amount -= Double.parseDouble(jsonObject.get("executedQty").toString());
                     }
-                    if(i == jsonArray.size()-1){
+                    if (i == jsonArray.size() - 1) {
                         milliTime = Long.parseLong(jsonObject.get("time").toString());
                     }
                 }
                 newData = MemberCoin.builder()
-                  .coinName(coinName)
-                  .owner_id(id)
-                  .avg_buy_price(avgPrice)
-                  .amount(amount)
-                  .mill_time(milliTime)
-                  .build();
+                        .coinName(coinName)
+                        .owner_id(id)
+                        .avg_buy_price(avgPrice)
+                        .amount(amount)
+                        .mill_time(milliTime)
+                        .build();
                 memberCoinListRepository.save(newData);
-            }else {
+            } else {
                 int breakPoint = 0;
                 double amount = dbCoin.getAmount();
                 double avgPrice = dbCoin.getAvg_buy_price();
                 long milliTime = dbCoin.getMill_time();
-                for(int i =0; i<jsonArray.size(); i++){
+                for (int i = 0; i < jsonArray.size(); i++) {
                     JSONObject jsonObject = (JSONObject) jsonArray.get(i);
                     breakPoint++;
-                    if(dbCoin.getMill_time() < Long.parseLong(jsonObject.get("time").toString())){
+                    if (dbCoin.getMill_time() < Long.parseLong(jsonObject.get("time").toString())) {
                         breakPoint = i;
                     }
                 }
-                for(int i = breakPoint; i < jsonArray.size(); i++){
+                for (int i = breakPoint; i < jsonArray.size(); i++) {
                     JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-                    if(jsonObject.get("side").equals("BUY")){
+                    if (jsonObject.get("side").equals("BUY")) {
                         double buyAmount = Double.parseDouble(jsonObject.get("executedQty").toString());
                         double buyPrice = Double.parseDouble(jsonObject.get("price").toString());
                         avgPrice = ((avgPrice * amount) + (buyAmount * buyPrice)) / (amount + buyAmount);
@@ -146,7 +147,7 @@ public class BinanceService implements ApiServiceInter {
                     } else if (jsonObject.get("side").equals("SELL")) {
                         amount = amount - Double.parseDouble(jsonObject.get("executedQty").toString());
                     }
-                    if(i == jsonArray.size()-1){
+                    if (i == jsonArray.size() - 1) {
                         milliTime = Long.parseLong(jsonObject.get("time").toString());
                     }
                 }
@@ -193,28 +194,29 @@ public class BinanceService implements ApiServiceInter {
         return entityString;
     }
 
-    public List<String> getMyCoinName() throws IOException, ParseException {
+    public List<String> getMyCoinName() throws ParseException {
         HmacSignatureGenerator signature = new HmacSignatureGenerator(secretKey);
-
         String timestamp = Long.toString(System.currentTimeMillis() + plusTime);
         String queryString = "timestamp=" + timestamp;
         String actualSign = signature.getSignature(queryString);
+        String entityString = "";
+        try {
+            HttpPost request = new HttpPost(serverUrl + "/sapi/v3/asset/getUserAsset?"
+                    + queryString + "&signature=" + actualSign);
 
-        HttpPost request = new HttpPost(serverUrl + "/sapi/v3/asset/getUserAsset?"
-                + queryString + "&signature=" + actualSign);
+            request.addHeader("Content-Type", "application/json");
+            request.addHeader("X-MBX-APIKEY", accessKey);
 
-        request.addHeader("Content-Type", "application/json");
-        request.addHeader("X-MBX-APIKEY", accessKey);
-
-        HttpResponse response = httpClient.execute(request);
-        HttpEntity entity = response.getEntity();
-
-        String entityString = EntityUtils.toString(entity, "UTF-8");
-
+            HttpResponse response = httpClient.execute(request);
+            HttpEntity entity = response.getEntity();
+            entityString = EntityUtils.toString(entity, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
         if (entityString.contains("-1021")) {
             plusTime -= 1000;
             return getMyCoinName();
-
         } else if (entityString.contains("-1131")) {
             plusTime += 1000;
             return getMyCoinName();
@@ -223,34 +225,43 @@ public class BinanceService implements ApiServiceInter {
         JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
         List<String> coinNames = new ArrayList<>();
         for (int i = 0; i < jsonArray.size(); i++) {
-            JSONObject jsonObject = (JSONObject)jsonArray.get(i);
+            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
             coinNames.add(jsonObject.get("asset").toString());
         }
         return coinNames;
     }
 
     @Override
-    public List<LogDto> getAllLogDto() throws IOException, ParseException {
+    public List<LogDto> getAllLogDto() throws ParseException {
         List<String> coinNames = getMyCoinName();
         getDollar();
         List<LogDto> logList = new ArrayList<>();
-        for (int i = 0; i < coinNames.size(); i++) {
-            String entityString = getOneCoinTradeLog(coinNames.get(i));
-            makeCoinEntityAndSave(entityString);
-            if(!entityString.contains("code")){
-                JSONParser jsonParser = new JSONParser();
-                JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
-                List<LogDto> oneList = makeOneCoinLogList(jsonArray);
-                logList.addAll(oneList);
+        try {
+            for (int i = 0; i < coinNames.size(); i++) {
+                String entityString = getOneCoinTradeLog(coinNames.get(i));
+                makeCoinEntityAndSave(entityString);
+                if (!entityString.contains("code")) {
+                    JSONParser jsonParser = new JSONParser();
+                    JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
+                    List<LogDto> oneList = makeOneCoinLogList(jsonArray);
+                    logList.addAll(oneList);
+                } else {
+                    LogDto logDto = new LogDto();
+                    logDto.setState("error: 바이낸스 에러 발생. 개발자에게 연락하세요.");
+                    logList.add(logDto);
+                    return logList;
+                }
             }
+        } catch (IOException e) {
+            throw new RuntimeException();
         }
         Collections.sort(logList, new LogTimeComparator());
         return logList;
     }
 
-    public List<LogDto> makeOneCoinLogList(JSONArray jsonArray){
+    public List<LogDto> makeOneCoinLogList(JSONArray jsonArray) {
         List<LogDto> logList = new ArrayList<>();
-        for(int i =0; i<jsonArray.size(); i++){
+        for (int i = 0; i < jsonArray.size(); i++) {
             LogDto logDto = new LogDto((JSONObject) jsonArray.get(i), oneDollarWon);
             logList.add(logDto);
         }
@@ -273,32 +284,36 @@ public class BinanceService implements ApiServiceInter {
         return result;
     }
 
-    public void getDollar () throws IOException, ParseException {
+    public void getDollar() throws ParseException {
         if (oneDollarWon == 0) {
-            HttpGet request = new HttpGet("https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD");
-            request.addHeader("Content-Type", "application/json");
-            request.addHeader("X-MBX-APIKEY", accessKey);
-            HttpResponse response = httpClient.execute(request);
-            HttpEntity entity = response.getEntity();
-            String result = EntityUtils.toString(entity, "UTF-8");
-            JSONArray jsonObject = (JSONArray) jsonParser.parse(result);
-            JSONObject a = (JSONObject) jsonObject.get(0);
-            oneDollarWon = (double) a.get("basePrice");
+            try {
+                HttpGet request = new HttpGet("https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD");
+                request.addHeader("Content-Type", "application/json");
+                request.addHeader("X-MBX-APIKEY", accessKey);
+                HttpResponse response = httpClient.execute(request);
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity, "UTF-8");
+                JSONArray jsonObject = (JSONArray) jsonParser.parse(result);
+                JSONObject a = (JSONObject) jsonObject.get(0);
+                oneDollarWon = (double) a.get("basePrice");
+            }catch (IOException e){
+                throw new RuntimeException();
+            }
         }
     }
 
-    public Map<String, String> makeSumData(List<AccountDto> dtoList){
+    public Map<String, String> makeSumData(List<AccountDto> dtoList) {
         Map<String, String> secondData = new HashMap<>();
         int totalBuyPrice = 0;
         int totalNowPrice = 0;
         int totalEarning = 0;
 
-        for(AccountDto dto : dtoList){
+        for (AccountDto dto : dtoList) {
             totalBuyPrice += (int) (dto.getBuyPrice() * dto.getOwnAmount());
             totalEarning += dto.getEarning();
             totalNowPrice += dto.getSumNowPrice();
         }
-        double avgRate = (int)((double)totalEarning/totalBuyPrice * 10000d)/100d;
+        double avgRate = (int) ((double) totalEarning / totalBuyPrice * 10000d) / 100d;
         secondData.put("totalBuyPrice", totalBuyPrice + "");
         secondData.put("totalNowPrice", totalNowPrice + "");
         secondData.put("totalEarning", totalEarning + "");
@@ -322,14 +337,14 @@ public class BinanceService implements ApiServiceInter {
             sumNowPriceWon = coinPrice * oneDollarWon * coinAmount;
             AccountDto dto = AccountDto.builder()
                     .coinName(coinName)
-                    .bigAmount(""+BigDecimal.valueOf(coinAmount))
+                    .bigAmount("" + BigDecimal.valueOf(coinAmount))
                     .bigNow(BigDecimal.valueOf(coinPrice * oneDollarWon) + "")
                     .nowPrice(coinPrice * oneDollarWon)
                     .ownAmount(coinAmount)
                     .sumNowPrice((int) sumNowPriceWon)
                     .trader("https://i.namu.wiki/i/Bf3cdzU4HpGUuQP0ZKI682ODWFFj6SBsfA-VL05m25ksKHjOHuHI9lKpg0ydpayw0J66lSqsxUd12acGFGNMnPnjjN8PgKBIbBDSumu09Yud2a42cpXV-Op-tZajllmChje-6s5QNucl-korqJEu2A.svg")
                     .build();
-            if(entity != null){
+            if (entity != null) {
                 dto.setBuyPrice(entity.getAvg_buy_price());
                 dto.setBigBuy(BigDecimal.valueOf(entity.getAvg_buy_price()) + "");
                 dto.setSumBuyPrice(dto.getOwnAmount() * dto.getBuyPrice());
@@ -337,31 +352,31 @@ public class BinanceService implements ApiServiceInter {
 
             dto.setEarning((int) ((dto.getNowPrice() * dto.getOwnAmount()) - (dto.getBuyPrice() * dto.getOwnAmount())));
             double rate = (dto.getNowPrice() / dto.getBuyPrice() * 100d) - 100;
-            if( (Math.round(rate * 100)) / 100d == 9.223372036854776E16){
+            if ((Math.round(rate * 100)) / 100d == 9.223372036854776E16) {
                 dto.setRateOfReturn(0);
-            }else {
+            } else {
                 dto.setRateOfReturn((Math.round(rate * 100)) / 100d);
             }
             dtoList.add(dto);
         }
-        Collections.sort( dtoList, new CoinSumBuyPriceComparator());
+        Collections.sort(dtoList, new CoinSumBuyPriceComparator());
         return dtoList;
     }
 
-    public void saveWalletInfo(Map<String, List<String>> info){
+    public void saveWalletInfo(Map<String, List<String>> info) {
         MemberCoin memberCoin;
         Iterator<String> coins = info.keySet().iterator();
         List<String> zeroList = new ArrayList<>();
         zeroList.add("0");
         zeroList.add("0");
         String id = request.getSession().getAttribute("userId").toString();
-        while (coins.hasNext()){
+        while (coins.hasNext()) {
             String coinName = coins.next();
-            if(info.get(coinName).toString().equals("[, ]")){
+            if (info.get(coinName).toString().equals("[, ]")) {
                 info.put(coinName, zeroList);
             }
-            memberCoin = memberCoinListRepository.findByCoinNameAndId(coinName,id);
-            if(memberCoin == null){
+            memberCoin = memberCoinListRepository.findByCoinNameAndId(coinName, id);
+            if (memberCoin == null) {
                 memberCoin = MemberCoin.builder()
                         .coinName(coinName)
                         .owner_id(id)
@@ -369,7 +384,7 @@ public class BinanceService implements ApiServiceInter {
                         .amount(Double.parseDouble(info.get(coinName).get(1)))
                         .build();
                 memberCoinListRepository.save(memberCoin);
-            }else {
+            } else {
                 memberCoin = MemberCoin.builder()
                         .idx(memberCoin.getIdx())
                         .coinName(coinName)

@@ -117,9 +117,16 @@ public class CoinoneService implements ApiServiceInter{
     @Override
     public List<LogDto> getAllLogDto() throws ParseException {
         List<LogDto> result = new ArrayList<>();
-        if(getNotDoneOrder().contains("error:")){
+        String notDoneStr = getNotDoneOrder();
+        String doneStr = getDoneOrder();
+        if(notDoneStr.contains("error:")){
             LogDto logDto = new LogDto();
-            logDto.setState(getNotDoneOrder());
+            logDto.setState(notDoneStr);
+            result.add(logDto);
+            return result;
+        } else if (doneStr.contains("error:")) {
+            LogDto logDto = new LogDto();
+            logDto.setState(notDoneStr);
             result.add(logDto);
             return result;
         }
@@ -247,7 +254,8 @@ public class CoinoneService implements ApiServiceInter{
             HttpResponse httpResponse = httpClient.execute(httpPost);
             result = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return "코인원 error: 통신오류!";
         }
         JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
         try {

@@ -64,35 +64,34 @@ public class AllController {
     @GetMapping("/all/all-trade-log")
     public Object getAllLog(Model model)  {
         List<LogDto> allLog = new ArrayList<>();
-        List<LogDto> result = new ArrayList<>();
+
         try {
             if (coinoneService.getKeys()) {
-                result = coinoneService.getAllLogDto();
-                if(result.size() == 1 && result.get(0).getState().contains("error")){
+                List<LogDto> coinoneDto = coinoneService.getAllLogDto();
+                if(coinoneDto.size() == 1 && coinoneDto.get(0).getState().contains("error")){
                     return ResponseEntity.ok("<script>" +
-                            "alert('"+result.get(0).getState() + "');" +
+                            "alert('"+coinoneDto.get(0).getState() + "');" +
                             "</script>");
                 }
-                allLog.addAll(result);
+                allLog.addAll(coinoneDto);
             }
             if (binanceService.getKeys()) {
-                List<LogDto> allLogDto = binanceService.getAllLogDto();
-                if(allLogDto.size() == 1 && allLogDto.get(0).getState().contains("error")){
+                List<LogDto> binanceDto = binanceService.getAllLogDto();
+                if(binanceDto.size() == 1 && binanceDto.get(0).getState().contains("error")){
                     return ResponseEntity.ok("<script>" +
-                            "alert('"+allLogDto.get(0).getState() + "');" +
+                            "alert('"+binanceDto.get(0).getState() + "');" +
                             "</script>");
                 }
-                allLog.addAll(binanceService.getAllLogDto());
+                allLog.addAll(binanceDto);
             }
             if (upbitService.getKeys()) {
-                List<LogDto> allLogDto = upbitService.getAllLogDto();
-                if(allLogDto.size() == 1 && allLogDto.get(0).getState().contains("error")){
+                List<LogDto> upbitDto = upbitService.getAllLogDto();
+                if(upbitDto.size() == 1 && upbitDto.get(0).getState().contains("error")){
                     return ResponseEntity.ok("<script>" +
-                            "alert('"+allLogDto.get(0).getState() + "');" +
+                            "alert('"+upbitDto.get(0).getState() + "');" +
                             "</script>");
-                }else {
-                    model.addAttribute("log", allLogDto);
                 }
+                allLog.addAll(upbitDto);
             }
             Collections.sort(allLog, new LogTimeComparator());
         }catch (ParseException parseException){

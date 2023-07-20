@@ -245,11 +245,7 @@ public class BinanceService implements ApiServiceInter {
                     JSONArray jsonArray = (JSONArray) jsonParser.parse(entityString);
                     List<LogDto> oneList = makeOneCoinLogList(jsonArray);
                     logList.addAll(oneList);
-                } else {
-                    LogDto logDto = new LogDto();
-                    logDto.setState("error: 바이낸스 에러 발생. 개발자에게 연락하세요.");
-                    logList.add(logDto);
-                    return logList;
+
                 }
             }
         } catch (IOException e) {

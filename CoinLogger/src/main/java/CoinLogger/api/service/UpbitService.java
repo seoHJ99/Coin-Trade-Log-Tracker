@@ -39,7 +39,6 @@ public class UpbitService implements ApiServiceInter {
     private final HttpClient httpClient;
     private final JSONParser jsonParser;
     private final HttpSender httpSender;
-    private DateTimeFormatter formatter;
     private final UpbitRepository upbitRepository;
     private String accessKey; // 받아오기
     private String secretKey; // 받아오기
@@ -225,7 +224,7 @@ public class UpbitService implements ApiServiceInter {
             JSONObject jsonObject = null;
             try {
                 jsonObject = (JSONObject) jsonParser.parse(jsonArray[i]);
-
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
                 logDto = LogDto.builder()
                         .state((String) jsonObject.get("state"))
                         .remainAmount((String) jsonObject.get("remaining_volume"))

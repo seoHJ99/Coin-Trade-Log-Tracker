@@ -53,9 +53,7 @@ public class BinanceController {
         if (binanceService.getKeys()) {
             try {
                coinName = binanceService.getMyCoinName();
-            } catch (IOException ioException) {
-                System.out.println("통신오류");
-                return ResponseEntity.ok("<script>alert('error: 통신오류!<br/> 개발자에게 연락하세요')</script>");
+
             } catch (ParseException parseException) {
                 System.out.println("Json 파싱 오류");
                 return ResponseEntity.ok("<script>alert('error: 파싱오류!<br/> 개발자에게 연락하세요')</script>");
@@ -77,9 +75,6 @@ public class BinanceController {
             } else {
                 model.addAttribute("log", null);
             }
-        } catch (IOException ioException) {
-            System.out.println("통신오류");
-            return ResponseEntity.ok("<script>alert('error: 통신오류!<br/> 개발자에게 연락하세요')</script>");
         } catch (ParseException parseException) {
             System.out.println("Json 파싱 오류");
             return ResponseEntity.ok("<script>alert('error: 파싱오류!<br/> 개발자에게 연락하세요')</script>");

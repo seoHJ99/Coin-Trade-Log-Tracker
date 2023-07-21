@@ -171,10 +171,12 @@ public class UpbitService implements ApiServiceInter {
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonObject = (JSONObject) jsonArray.get(i);
             AccountDto oneData = null;
-            String coin = jsonObject.get("currency").toString();
-            double amount = Double.parseDouble(jsonObject.get("balance").toString()) + Double.parseDouble(jsonObject.get("locked").toString());
-            double buyPrice = Double.parseDouble(jsonObject.get("avg_buy_price").toString());
-            double price = Double.parseDouble(myCoinPrice.get(i));
+            try {
+                String coin = jsonObject.get("currency").toString();
+                double amount = Double.parseDouble(jsonObject.get("balance").toString()) + Double.parseDouble(jsonObject.get("locked").toString());
+                double buyPrice = Double.parseDouble(jsonObject.get("avg_buy_price").toString());
+                double price = Double.parseDouble(myCoinPrice.get(i));
+
             if (amount == 0) {
                 continue;
             }
@@ -199,6 +201,18 @@ public class UpbitService implements ApiServiceInter {
                         .nowPrice(price)
                         .bigNow(BigDecimal.valueOf(price).toPlainString())
                         .build();
+            }
+            }catch (NullPointerException e) {
+                e.printStackTrace();
+                if (jsonObject.get("error").toString().contains("invalid_query_payload")) {
+                    oneData.setCoinName("업비트 error: api key 오류!");
+                } else if (jsonObject.get("error").toString().contains("expired_access_key")) {
+                    oneData.setCoinName("업비트 error: api key 만료됨!");
+                }else{
+                    oneData.setCoinName("업비트 error: 개발자에게 연락하세요!");
+                }
+                result.add(oneData);
+                return result;
             }
             oneData.setTrader("https://files.readme.io/40e45a0-small-upbit_color.png");
             oneData.setSumNowPrice((int) (Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount()));

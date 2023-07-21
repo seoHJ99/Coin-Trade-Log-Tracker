@@ -37,13 +37,21 @@ public class AllController {
         List<AccountDto> allAccount = new ArrayList<>();
         try {
             if (coinoneService.getKeys()) {
+                List<AccountDto> accountList = coinoneService.getAccountList();
+                if(accountList.size() == 1 && accountList.get(0).getCoinName().contains("error")){
+                    return ResponseEntity.ok("<script>alert('"+ accountList.get(0).getCoinName()+" ')</script>");
+                }
                 allAccount.addAll(coinoneService.getAccountList());
             }
             if (binanceService.getKeys()) {
                 allAccount.addAll(binanceService.getAccountList());
             }
             if (upbitService.getKeys()) {
-                allAccount.addAll(upbitService.getAccountList());
+                List<AccountDto> accountList = upbitService.getAccountList();
+                if(accountList.size() == 1 && accountList.get(0).getCoinName().contains("error")){
+                    return ResponseEntity.ok( "<script>alert('"+ accountList.get(0).getCoinName()+" ')</script>");
+                }
+                allAccount.addAll(accountList);
             }
         }catch (IOException e){
             e.printStackTrace();

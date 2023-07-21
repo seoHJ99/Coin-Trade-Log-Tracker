@@ -23,9 +23,12 @@ public class UpbitController {
     private final PublicMethod publicMethod;
     private final UpbitService upbit;
     @GetMapping("/upbit/account")
-    public String getAllAccounts(Model model) throws IOException, ParseException {
+    public Object getAllAccounts(Model model) throws IOException, ParseException {
         if(upbit.getKeys()) {
             List<AccountDto> dtoList = upbit.getAccountList();
+            if(dtoList.size() == 1 && dtoList.get(0).getCoinName().contains("error")){
+                return ResponseEntity.ok("<script>alert('"+ dtoList.get(0).getCoinName()+" ')</script>");
+            }
             Map<String, String> secondData = publicMethod.makeSumData(dtoList);
             model.addAttribute("data", dtoList);
             model.addAttribute("secondData", secondData);

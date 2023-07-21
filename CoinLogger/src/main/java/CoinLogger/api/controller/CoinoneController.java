@@ -21,9 +21,12 @@ public class CoinoneController {
     private final CoinoneService coinoneService;
 
     @GetMapping("/coinone/account")
-    public String getAccount(Model model) throws ParseException {
+    public Object getAccount(Model model) throws ParseException {
         if(coinoneService.getKeys()) {
             List<AccountDto> dtoList = coinoneService.getAccountList();
+            if(dtoList.size() == 1 && dtoList.get(0).getCoinName().contains("error")){
+                return ResponseEntity.ok( "<script>alert('"+ dtoList.get(0).getCoinName()+" ')</script>");
+            }
             Map<String, String> secondData = publicMethod.makeSumData(dtoList);
             model.addAttribute("data", dtoList);
             model.addAttribute("secondData", secondData);

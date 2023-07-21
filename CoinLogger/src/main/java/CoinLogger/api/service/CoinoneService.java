@@ -335,53 +335,83 @@ public class CoinoneService implements ApiServiceInter{
         List<AccountDto> result = new ArrayList<>();
         JSONArray jsonArray = (JSONArray) jsonParser.parse( getAccounts());
         Map<String, String> coinMap = getMyCoinPrice();
-        for (int i = 0; i < jsonArray.size(); i++) {
-            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-            AccountDto oneData = null;
-            String coin = jsonObject.get("currency").toString();
-            double amount = Double.parseDouble(jsonObject.get("available").toString()) + Double.parseDouble(jsonObject.get("limit").toString());
-            double buyPrice = Double.parseDouble(jsonObject.get("average_price").toString());
-            if (amount == 0) {
-                continue;
-            }
-            String mapValue = coinMap.get(coin.toLowerCase());
-            double price;
-            if (mapValue == null) {
-                price = 0;
-            } else {
-                price = Double.parseDouble(mapValue);
+            for (int i = 0; i < jsonArray.size(); i++) {
+                String coin = "";
+                AccountDto oneData = new AccountDto();
+                JSONObject jsonObject = null;
+                double amount = 0;
+                double buyPrice = 0;
+                try {
+                    jsonObject = (JSONObject) jsonArray.get(i);
+                    coin = jsonObject.get("currency").toString();
+                    amount = Double.parseDouble(jsonObject.get("available").toString()) + Double.parseDouble(jsonObject.get("limit").toString());
+                    buyPrice = Double.parseDouble(jsonObject.get("average_price").toString());
+                }catch (NullPointerException e){
+                    e.printStackTrace();
+                    Object error_code = jsonObject.get("error_code");
+                    if (error_code.equals("4")) {
+                        oneData.setCoinName("코인원 error:제한된 사용자입니다.");
+                        result.add(oneData);
+                        return result;
+                    } else if (error_code.equals("12")) {
+                        oneData.setCoinName("코인원 error:api key의 값이 옳지 않습니다.");
+                        result.add(oneData);
+
+                        return result;
+                    } else if (error_code.equals("40")) {
+                        oneData.setCoinName("코인원 error:승인되지 않은 api입니다.");
+                        result.add(oneData);
+                        return result;
+                    } else if (error_code.equals("107")) {
+                        oneData.setCoinName("코인원 error:파라미터 에러입니다.");
+                        result.add(oneData);
+                        return result;
+                    } else {
+                        e.printStackTrace();
+                    }
+                }
+                if (amount == 0) {
+                    continue;
+                }
+                String mapValue = coinMap.get(coin.toLowerCase());
+                double price;
+                if (mapValue == null) {
+                    price = 0;
+                } else {
+                    price = Double.parseDouble(mapValue);
+                }
+
+                if (price == 0) {
+                    oneData = AccountDto.builder()
+                            .coinName(coin)
+                            .ownAmount(amount)
+                            .bigAmount(BigDecimal.valueOf(amount).toPlainString())
+                            .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
+                            .bigNow(BigDecimal.valueOf(price).toPlainString())
+                            .buyPrice(buyPrice)
+                            .nowPrice(0)
+                            .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
+                            .build();
+                } else {
+                    oneData = AccountDto.builder()
+                            .coinName(coin)
+                            .ownAmount(amount)
+                            .bigAmount(BigDecimal.valueOf(amount).toPlainString())
+                            .buyPrice(Double.valueOf(buyPrice))
+                            .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
+                            .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
+                            .nowPrice(Double.valueOf(price))
+                            .bigNow(BigDecimal.valueOf(price).toPlainString())
+                            .build();
+                }
+                oneData.setSumNowPrice((int) (Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount()));
+                oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
+                double rate = (oneData.getNowPrice() / oneData.getBuyPrice() * 100d) - 100;
+                oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
+                oneData.setSumBuyPrice(oneData.getOwnAmount() * oneData.getBuyPrice());
+                result.add(oneData);
             }
 
-            if (price == 0) {
-                oneData = AccountDto.builder()
-                        .coinName(coin)
-                        .ownAmount(amount)
-                        .bigAmount(BigDecimal.valueOf(amount).toPlainString())
-                        .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
-                        .bigNow(BigDecimal.valueOf(price).toPlainString())
-                        .buyPrice(buyPrice)
-                        .nowPrice(0)
-                        .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
-                        .build();
-            } else {
-                oneData = AccountDto.builder()
-                        .coinName(coin)
-                        .ownAmount(amount)
-                        .bigAmount(BigDecimal.valueOf(amount).toPlainString())
-                        .buyPrice(Double.valueOf(buyPrice))
-                        .bigBuy(BigDecimal.valueOf(buyPrice).toPlainString())
-                        .trader("https://coinone.co.kr/common/assets/images/coinone_logo/coinone_logo_blue.svg")
-                        .nowPrice(Double.valueOf(price))
-                        .bigNow(BigDecimal.valueOf(price).toPlainString())
-                        .build();
-            }
-            oneData.setSumNowPrice((int) (Double.valueOf(oneData.getNowPrice()) * oneData.getOwnAmount()));
-            oneData.setEarning((int) ((oneData.getNowPrice() * oneData.getOwnAmount()) - (oneData.getBuyPrice() * oneData.getOwnAmount())));
-            double rate = (oneData.getNowPrice() / oneData.getBuyPrice() * 100d) - 100;
-            oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
-            oneData.setSumBuyPrice(oneData.getOwnAmount() * oneData.getBuyPrice());
-            result.add(oneData);
-        }
         Collections.sort(result, new CoinSumBuyPriceComparator());
         return result;
     }

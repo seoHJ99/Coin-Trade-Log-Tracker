@@ -158,10 +158,16 @@ public class UpbitService implements ApiServiceInter {
 
 
     @Override
-    public List<AccountDto> getAccountList() throws IOException, ParseException {
+    public List<AccountDto> getAccountList() throws ParseException {
         List<AccountDto> result = new ArrayList<>();
-        JSONArray jsonArray = (JSONArray) jsonParser.parse(getAccounts());
-        List<String> myCoinPrice = getMyCoinPrice();
+        JSONArray jsonArray = null;
+        List<String> myCoinPrice = null;
+        try {
+            jsonArray = (JSONArray) jsonParser.parse(getAccounts());
+            myCoinPrice = getMyCoinPrice();
+        }catch (IOException e){
+            throw new RuntimeException();
+        }
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonObject = (JSONObject) jsonArray.get(i);
             AccountDto oneData = null;
@@ -201,6 +207,7 @@ public class UpbitService implements ApiServiceInter {
             oneData.setRateOfReturn((Math.round(rate * 100)) / 100d);
             result.add(oneData);
         }
+
         Collections.sort(result, new CoinSumBuyPriceComparator());
         return result;
     }

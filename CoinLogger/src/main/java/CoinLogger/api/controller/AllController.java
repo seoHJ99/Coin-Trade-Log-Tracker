@@ -41,7 +41,7 @@ public class AllController {
                 if(accountList.size() == 1 && accountList.get(0).getCoinName().contains("error")){
                     return ResponseEntity.ok("<script>alert('"+ accountList.get(0).getCoinName()+" ')</script>");
                 }
-                allAccount.addAll(coinoneService.getAccountList());
+                allAccount.addAll(accountList);
             }
             if (binanceService.getKeys()) {
                 allAccount.addAll(binanceService.getAccountList());

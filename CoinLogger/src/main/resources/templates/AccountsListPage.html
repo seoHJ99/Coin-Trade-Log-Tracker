@@ -79,12 +79,12 @@
       }
 
       table {
-        width: 100%;
         padding: 5px;
         margin-bottom: 20px;
       }
       th,
       td {
+        min-width: 100px;
         padding: 5px;
         text-align: center;
       }
@@ -98,6 +98,7 @@
         overflow: auto;
       }
       .seperate {
+        table-layout: fixed;
         border-collapse: collapse;
         border: 1px solid #888;
       }
@@ -120,6 +121,9 @@
         top: -7px;
         right: 35px;
         display: none;
+      }
+      .sum {
+        width: 100%;
       }
       @-webkit-keyframes spin {
         0% {
@@ -269,7 +273,7 @@
           .prop("offsetWidth");
         $(".firstTh")
           .eq(i)
-          .css("width", trWidth - 10.5);
+          .css("width", trWidth - 11);
       }
 
       $(".select_box").hover(

@@ -24,18 +24,10 @@ public class BinanceController {
     private final PublicMethod publicMethod;
 
     @GetMapping("/binance/account")
-    public Object getAccount(Model model) {
+    public Object getAccount(Model model) throws IOException, ParseException {
         if (binanceService.getKeys()) {
             List<AccountDto> dtoList = new ArrayList<>();
-            try {
                 dtoList = binanceService.getAccountList();
-            } catch (IOException ioException) {
-                System.out.println("통신오류");
-                return ResponseEntity.ok("<script>alert('error: 통신오류!<br/> 개발자에게 연락하세요')</script>");
-            } catch (ParseException parseException) {
-                System.out.println("Json 파싱 오류");
-                return ResponseEntity.ok("<script>alert('error: 파싱오류!<br/> 개발자에게 연락하세요')</script>");
-            }
             Map<String, String> secondData = publicMethod.makeSumData(dtoList);
             model.addAttribute("data", dtoList);
             model.addAttribute("secondData", secondData);
@@ -48,16 +40,10 @@ public class BinanceController {
     }
 
     @GetMapping("/binance/wallet")
-    public Object makeAvgPriceAndSave(Model model) {
+    public Object makeAvgPriceAndSave(Model model) throws ParseException {
         List<String> coinName = new ArrayList<>();
         if (binanceService.getKeys()) {
-            try {
                coinName = binanceService.getMyCoinName();
-
-            } catch (ParseException parseException) {
-                System.out.println("Json 파싱 오류");
-                return ResponseEntity.ok("<script>alert('error: 파싱오류!<br/> 개발자에게 연락하세요')</script>");
-            }
             model.addAttribute("coinName", coinName);
         } else {
             model.addAttribute("coinName", null);
@@ -67,18 +53,13 @@ public class BinanceController {
     }
 
     @GetMapping("/binance/all-trade-log")
-    public Object getLog(Model model) {
-        try {
+    public Object getLog(Model model) throws ParseException {
             if (binanceService.getKeys()) {
                 model.addAttribute("log", binanceService.getAllLogDto());
                 model.addAttribute("binance");
             } else {
                 model.addAttribute("log", null);
             }
-        } catch (ParseException parseException) {
-            System.out.println("Json 파싱 오류");
-            return ResponseEntity.ok("<script>alert('error: 파싱오류!<br/> 개발자에게 연락하세요')</script>");
-        }
         return "LogListPage";
     }
 

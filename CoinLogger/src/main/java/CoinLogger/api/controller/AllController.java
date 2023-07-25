@@ -33,9 +33,8 @@ public class AllController {
     private final AllService allService;
 
     @GetMapping("/all/account")
-    public Object getAllAccount(Model model) {
+    public Object getAllAccount(Model model) throws IOException, ParseException {
         List<AccountDto> allAccount = new ArrayList<>();
-        try {
             if (coinoneService.getKeys()) {
                 List<AccountDto> accountList = coinoneService.getAccountList();
                 if(accountList.size() == 1 && accountList.get(0).getCoinName().contains("error")){
@@ -53,15 +52,7 @@ public class AllController {
                 }
                 allAccount.addAll(accountList);
             }
-        }catch (IOException e){
-            e.printStackTrace();
-            System.out.println("통신 오류");
-            return ResponseEntity.ok("<script>alert('error: 통신오류!<br/> 개발자에게 연락하세요')</script>");
-        }catch (ParseException e){
-            e.printStackTrace();
-            System.out.println("파싱 오류");
-            return ResponseEntity.ok("<script>alert('error: 파싱오류!<br/> 개발자에게 연락하세요')</script>");
-        }
+
         Collections.sort(allAccount, new CoinSumBuyPriceComparator());
         Map<String, String> secondData = publicMethod.makeSumData(allAccount);
         model.addAttribute("data", allAccount);
@@ -70,10 +61,9 @@ public class AllController {
     }
 
     @GetMapping("/all/all-trade-log")
-    public Object getAllLog(Model model)  {
+    public Object getAllLog(Model model) throws ParseException {
         List<LogDto> allLog = new ArrayList<>();
 
-        try {
             if (coinoneService.getKeys()) {
                 List<LogDto> coinoneDto = coinoneService.getAllLogDto();
                 if(coinoneDto.size() == 1 && coinoneDto.get(0).getState().contains("error")){
@@ -102,10 +92,7 @@ public class AllController {
                 allLog.addAll(upbitDto);
             }
             Collections.sort(allLog, new LogTimeComparator());
-        }catch (ParseException parseException){
-            System.out.println("Json 파싱 오류");
-            return ResponseEntity.ok("<script>alert('error: 파싱오류!<br/> 개발자에게 연락하세요')</script>");
-        }
+
         model.addAttribute("log", allLog);
         return "LogListPage";
     }

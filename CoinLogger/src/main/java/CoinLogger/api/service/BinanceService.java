@@ -338,7 +338,7 @@ public class BinanceService implements ApiServiceInter {
                     .nowPrice(coinPrice * oneDollarWon)
                     .ownAmount(coinAmount)
                     .sumNowPrice((int) sumNowPriceWon)
-                    .trader("https://i.namu.wiki/i/Bf3cdzU4HpGUuQP0ZKI682ODWFFj6SBsfA-VL05m25ksKHjOHuHI9lKpg0ydpayw0J66lSqsxUd12acGFGNMnPnjjN8PgKBIbBDSumu09Yud2a42cpXV-Op-tZajllmChje-6s5QNucl-korqJEu2A.svg")
+                    .trader("https://w7.pngwing.com/pngs/279/342/png-transparent-binance-cryptocurrency-exchange-initial-coin-offering-coin-text-logo-computer-wallpaper.png")
                     .build();
             if (entity != null) {
                 dto.setBuyPrice(entity.getAvg_buy_price());

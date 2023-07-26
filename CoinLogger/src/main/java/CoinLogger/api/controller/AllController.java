@@ -92,7 +92,6 @@ public class AllController {
                 allLog.addAll(upbitDto);
             }
             Collections.sort(allLog, new LogTimeComparator());
-
         model.addAttribute("log", allLog);
         return "LogListPage";
     }
@@ -136,5 +135,11 @@ public class AllController {
         }else {
             return 1;
         }
+    }
+
+    @GetMapping("/login/error")
+    @ResponseBody
+    public String findIdPage(){
+        return "<script>alert('없는 계정입니다.'); location.href='/login'</script>";
     }
 }

@@ -4,12 +4,14 @@ import CoinLogger.api.security.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Configuration
 @RequiredArgsConstructor
@@ -25,7 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeRequests()
-                .antMatchers("/login","/member/join","/id/check", "/join")
+                .antMatchers("/login","/member/join","/id/check", "/join","/login/error")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()
@@ -37,6 +39,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(((request, response, authentication) -> {
                     request.getSession().setAttribute("userId", request.getParameter("userId").trim());
                     response.sendRedirect("/all/account");
+                }))
+                .failureHandler(((request, response, exception) -> {
+                    response.sendRedirect("/login/error");
                 }))
                 .and()
            .logout()

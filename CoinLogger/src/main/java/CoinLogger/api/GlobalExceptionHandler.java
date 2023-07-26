@@ -20,11 +20,10 @@ public class GlobalExceptionHandler {
     public Object classCastExceptionHandler(Exception e){
         e.printStackTrace();
         return ResponseEntity.ok("<script>alert('변환 에러!" +
-                "1. 업비트 api ip주소가 옳바른지 확인해주세요" +
+                "1. 업비트 api등록 ip주소가 옳바른지 확인해주세요" +
                 "2. api key가 옳바른지 확인해주세요" +
                 "3. 해결법이 통하지 않으면 개발자에게 연락하세요!')</script>");
     }
-
     @ExceptionHandler(value = IOException.class)
     public Object IOExceptionHandler(Exception e){
         e.printStackTrace();

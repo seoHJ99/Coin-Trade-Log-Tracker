@@ -1,0 +1,43 @@
+CREATE DATABASE CoinLog;
+
+USE CoinLog;
+
+DROP TABLE if EXISTS member_coin_list;
+CREATE TABLE member_coin_list(
+idx INT PRIMARY KEY AUTO_INCREMENT,
+owner_id VARCHAR(12) NOT NULL,
+coin_name CHAR(8) NOT NULL,
+avg_buy_price DOUBLE NOT NULL,
+amount DOUBLE NOT NULL,
+mill_time BIGINT NOT null
+);
+
+CREATE TABLE upbit(
+idx INT PRIMARY KEY AUTO_INCREMENT,
+owner_id VARCHAR(12) NOT NULL,
+access_key VARCHAR(40) NULL,
+secret_key VARCHAR(40) NULL
+);
+
+CREATE TABLE coinone(
+idx INT PRIMARY KEY AUTO_INCREMENT,
+owner_id VARCHAR(12) NOT NULL,
+access_key VARCHAR(40) NULL,
+secret_key VARCHAR(40) NULL
+);
+
+CREATE TABLE binance(
+idx INT PRIMARY KEY AUTO_INCREMENT,
+owner_id VARCHAR(12) NOT NULL,
+access_key VARCHAR(65) NULL,
+secret_key VARCHAR(65) NULL
+);
+
+DROP TABLE if EXISTS member;
+CREATE TABLE member(
+idx INT PRIMARY KEY AUTO_INCREMENT,
+member_id VARCHAR(12) NOT NULL,
+member_pw VARCHAR(150) NULL
+);
+
+ALTER TABLE member ADD CONSTRAINT UNIQUE (member_id);

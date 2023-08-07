@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ public class AllService {
     @Autowired
     private HttpServletRequest request;
 
+    @Transactional
     public void saveKeys(Map<String, String[]> data){
         String[] upbitKey = data.get("upbit");
         String[] coinoneKey = data.get("coinone");
@@ -88,6 +90,7 @@ public class AllService {
         return apiMap;
     }
 
+    @Transactional
     public void saveMember(HttpServletRequest data){
         Member member= new  Member(data.getParameter("memberId"), passwordEncoder.encode(data.getParameter("memberPw")));
         memberRepository.save(member);

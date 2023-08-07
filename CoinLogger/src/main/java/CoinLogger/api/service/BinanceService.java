@@ -24,6 +24,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -35,7 +36,6 @@ import java.util.*;
 public class BinanceService implements ApiServiceInter {
     private final HttpClient httpClient;
     private final JSONParser jsonParser;
-    private final PublicMethod publicMethod;
     private final MemberCoinListRepository memberCoinListRepository;
 
     private final BinanceRepository binanceRepository;
@@ -88,6 +88,7 @@ public class BinanceService implements ApiServiceInter {
         return entityString;
     }
 
+    @Transactional
     public void makeCoinEntityAndSave(String entityString) throws ParseException {
         MemberCoin newData = null;
         if (!entityString.contains("code") && !(entityString).equals("[]")) {

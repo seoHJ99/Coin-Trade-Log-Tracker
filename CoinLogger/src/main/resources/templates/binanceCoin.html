@@ -77,6 +77,49 @@
         color: black;
         text-decoration: none;
       }
+      @media only screen and (min-width: 200px) and (max-width: 800px) {
+        .contain_all {
+          margin: 0;
+        }
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+          font-size: 11px;
+          width: auto;
+          min-width: unset;
+        }
+        .header {
+          width: 100%;
+        }
+        .nav {
+          width: 100%;
+          padding: 0;
+          font-size: 11px;
+          /* justify-content: flex-start; */
+        }
+
+        .search {
+          width: 40px;
+          font-size: 11px;
+          position: relative;
+          right: -5px;
+        }
+        .table {
+          width: 100%;
+        }
+        .trader {
+          width: 20px;
+        }
+        .col_name {
+          min-width: unset;
+          min-height: auto;
+        }
+        td {
+          word-break: break-all;
+          height: 30px;
+        }
+      }
     </style>
   </head>
   <body>
